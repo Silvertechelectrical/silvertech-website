@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="auth-card">
+            <h1>Silvertech Access</h1>
+            <p class="small">Secure login for downloads, account history, and premium access.</p>
+            <form>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <label class="password-toggle" for="show-password-toggle">
+                    <input type="checkbox" id="show-password-toggle">
+                    Show password
+                </label>
+                <button type="button" id="loginBtn">Sign In</button>
+                <button type="button" id="registerBtn">Create Account</button>
+                <button type="button" id="deleteAccountBtn" class="btn btn-secondary hidden">Delete Account</button>
+            </form>
+            <p id="status-message" class="status-message"></p>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/firebase-init.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+</body>
+</html>

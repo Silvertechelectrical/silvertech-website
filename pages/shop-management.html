@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Shop | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>Manage Shop Items</h1>
+            <p>Upload and manage items for sale in the public shop.</p>
+        </section>
+
+        <!-- Upload Form -->
+        <section class="admin-panel">
+            <h2>Upload New Item</h2>
+            <form id="shop-upload-form">
+                <label for="item-name">Item Name *</label>
+                <input id="item-name" type="text" placeholder="e.g., Network Audit Template" required>
+
+                <label for="item-category">Category *</label>
+                <select id="item-category" required>
+                    <option value="">Select a category</option>
+                    <option value="Templates">Templates</option>
+                    <option value="Digital Assets">Digital Assets</option>
+                    <option value="Training Materials">Training Materials</option>
+                    <option value="Software">Software</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="item-description">Description *</label>
+                <textarea id="item-description" placeholder="Describe the item..." required rows="4"></textarea>
+
+                <label for="item-price">Price (KSH) *</label>
+                <input id="item-price" type="number" placeholder="2500" min="0" required>
+
+                <label for="item-format">Download Format</label>
+                <input id="item-format" type="text" placeholder="e.g., PDF, Excel, ZIP">
+
+                <label for="item-featured">
+                    <input id="item-featured" type="checkbox">
+                    Featured Item
+                </label>
+
+                <label for="item-file">Upload File (image/document) *</label>
+                <input id="item-file" type="file" required accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">
+
+                <button type="submit">Upload Item</button>
+            </form>
+            <p id="upload-status" class="status-message"></p>
+        </section>
+
+        <!-- Items List -->
+        <section class="admin-panel">
+            <h2>Your Items</h2>
+            <div id="shop-items-list" class="services-grid"></div>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/shop-management.js"></script>
+</body>
+</html>

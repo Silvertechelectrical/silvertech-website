@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Browse | Silvertech</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a class="brand" href="../index.html">
+      <span class="brand-icon icon icon-home"></span>
+      <span>Silvertech</span>
+    </a>
+    <div class="nav-links">
+      <a href="services.html">Services</a>
+      <a href="shop.html">Shop</a>
+      <a href="silverstore.html">Store</a>
+      <a href="login.html">Login</a>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <section class="page-hero">
+      <h1>Browse Store Apps</h1>
+      <p>View applications and assets uploaded by approved developers and the Silvertech owner.</p>
+      <input id="store-search" class="search-bar" type="text" placeholder="Search apps or resources...">
+    </section>
+
+    <section id="store-items" class="services-grid"></section>
+  </main>
+
+  <script src="../firebase-config.js"></script>
+  <script type="module" src="../js/auth-nav.js"></script>
+  <script type="module" src="../js/store-browse.js"></script>
+</body>
+</html>

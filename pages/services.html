@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <div class="hero-actions">
+                <a class="btn btn-secondary hidden" id="services-add-button" href="admin.html">Add Service</a>
+            </div>
+            <h1>Professional Services</h1>
+            <p>Search by category or request a consultation for premium field support.</p>
+            <input id="service-search" class="search-bar" type="text" placeholder="Search services or categories">
+        </section>
+
+        <section id="services-list" class="services-grid"></section>
+
+        <section class="request-panel">
+            <h2>Submit a Service Request</h2>
+            <p>Choose a service, add your phone number, and our team will contact you.</p>
+            <form id="service-request-form">
+                <label class="small" for="request-service-name">Select a service</label>
+                <select id="request-service-name" title="Select a service" required>
+                    <option value="">Select a service</option>
+                </select>
+                <input id="request-phone" type="tel" placeholder="Your phone number" required>
+                <button type="submit">Send Request</button>
+            </form>
+            <p id="request-status" class="status-message"></p>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/services.js"></script>
+</body>
+</html>

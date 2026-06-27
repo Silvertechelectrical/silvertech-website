@@ -1,0 +1,14 @@
+{
+  "name": "silvertech-website",
+  "version": "1.0.0",
+  "description": "Silvertech Electrical Firebase seeding script",
+  "main": "seed.js",
+  "scripts": {
+    "seed": "node seed.js",
+    "set-admin": "node set-admin.js",
+    "set-developer": "node set-developer.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

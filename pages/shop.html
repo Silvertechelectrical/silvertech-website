@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <div class="hero-actions">
+                <a class="btn btn-secondary hidden" id="shop-manage-button" href="shop-management.html">Add Item</a>
+            </div>
+            <h1>Silvertech Shop</h1>
+            <p>Browse and purchase premium digital assets, templates, and field-ready resources.</p>
+            <input id="shop-search" class="search-bar" type="text" placeholder="Search items...">
+        </section>
+
+        <section id="shop-items" class="services-grid"></section>
+
+        <section id="purchase-panel" class="request-panel hidden">
+            <h2>Purchase Item</h2>
+            <p>Select an item and provide your contact details.</p>
+            <form id="purchase-form">
+                <label class="small" for="purchase-item-name">Item</label>
+                <select id="purchase-item-name" title="Select an item" required>
+                    <option value="">Select an item</option>
+                </select>
+                <input id="purchase-email" type="email" placeholder="Your email" required>
+                <input id="purchase-phone" type="tel" placeholder="Your phone number" required>
+                <button type="submit">Request Purchase</button>
+            </form>
+            <p id="purchase-status" class="status-message"></p>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/shop.js"></script>
+</body>
+</html>

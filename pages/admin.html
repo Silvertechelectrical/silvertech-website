@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>Silvertech Admin Panel</h1>
+            <p class="small">Manage services, view requests, and keep your admin workflow secure.</p>
+            <p id="admin-welcome" class="small"></p>
+        </section>
+
+        <section id="admin-loading" class="auth-card">
+            <h2>Checking access...</h2>
+            <p class="small">Please wait while we verify your admin privileges.</p>
+        </section>
+
+        <section id="admin-unauthenticated" class="auth-card hidden">
+            <h2>Sign in required</h2>
+            <p class="small">You must be signed in with your admin account to access this panel.</p>
+            <button onclick="window.location.href='login.html'">Go to Login</button>
+        </section>
+
+        <section id="admin-unauthorized" class="auth-card hidden">
+            <h2>Access denied</h2>
+            <p class="small">Your account is not configured as an admin. Contact the site owner for access.</p>
+            <button onclick="window.location.href='dashboard.html'">Return to Dashboard</button>
+        </section>
+
+        <section id="admin-shell" class="hidden">
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <h2>Your Services</h2>
+                    <p class="small">Edit or remove services available on the public site.</p>
+                </article>
+                <article class="feature-card">
+                    <h2>Add Service</h2>
+                    <p class="small">Publish a new service quickly with a title, category, and price.</p>
+                </article>
+                <article class="feature-card">
+                    <h2>Admin Actions</h2>
+                    <p class="small">Only signed-in admins can save content and manage the service catalog.</p>
+                    <button id="logoutBtn" type="button">Sign Out</button>
+                </article>
+            </div>
+
+            <section class="panel">
+                <h2>Add a New Service</h2>
+                <form id="admin-service-form">
+                    <input id="service-name" placeholder="Service name" required>
+                    <select id="service-category" title="Service category" required>
+                        <option value="">Select category</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Telecom">Telecom</option>
+                    </select>
+                    <input id="service-price" type="number" placeholder="Price" required>
+                    <input id="service-delivery" placeholder="Delivery timeline (e.g. 2-3 business days)" required>
+                    <textarea id="service-description" placeholder="Service description"></textarea>
+                    <label class="small">
+                        <input id="service-featured" type="checkbox"> Feature this service on the homepage
+                    </label>
+                    <button type="submit">Save Service</button>
+                    <p id="admin-service-status" class="status-message"></p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <h2>Your Service Catalog</h2>
+                <div id="admin-services-list" class="services-grid"></div>
+            </section>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/admin.js"></script>
+</body>
+</html>

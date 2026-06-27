@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Silvertech</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a href="services.html">Services</a>
+            <a href="shop.html">Shop</a>
+            <a href="silverstore.html">Store</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>My Account</h1>
+            <p id="auth-status">Guest access</p>
+        </section>
+
+        <section class="panel">
+            <h2>Recent Activity</h2>
+            <div id="history-list" class="history-list"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Subscription Status</h2>
+            <p>Active • Premium access enabled</p>
+            <button id="logoutBtn">Sign Out</button>
+        </section>
+    </main>
+
+    <script src="../firebase-config.js"></script>
+    <script type="module" src="../js/firebase-init.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script>
+        const historyList = document.getElementById('history-list');
+        const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
+        if (history.length) {
+            historyList.innerHTML = history.map((item) => `<div class="history-item"><strong>${item.name}</strong><br><span class="small">${item.type} • ${item.at}</span></div>`).join('');
+        } else {
+            historyList.innerHTML = '<p class="small">No activity yet. Request a service or open the store to begin.</p>';
+        }
+    </script>
+</body>
+</html>

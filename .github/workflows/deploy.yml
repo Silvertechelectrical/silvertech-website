@@ -60,7 +60,10 @@ jobs:
 
       - name: Ensure GitHub Pages source is set to gh-pages root
         uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const response = await github.rest.pages.updateInformationForRepo({
               owner: context.repo.owner,
@@ -72,6 +75,7 @@ jobs:
       - name: Confirm GitHub Pages site settings
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const site = await github.rest.pages.get({
               owner: context.repo.owner,

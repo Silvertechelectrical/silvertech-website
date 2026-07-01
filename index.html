@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silvertech Electrical | Future Tech</title>
+    <meta name="description" content="Silvertech Electrical blends secure electrical and telecom services with Firebase authentication, a dynamic shop, and Firestore-backed updates.">
+    <meta property="og:title" content="Silvertech Electrical | Future Tech">
+    <meta property="og:description" content="Secure electrical and telecom services with Firebase auth, Firestore data, and a polished shop experience.">
+    <meta property="og:image" content="assets/img/silvertech_logo.ico">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/x-icon" href="assets/img/silvertech_logo.ico">
+    <link rel="apple-touch-icon" href="assets/img/silvertech_logo.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
     <link rel="stylesheet" href="assets/css/style.css?v=20260627">
 </head>
 <body>
@@ -15,8 +28,14 @@
         </a>
         <div class="nav-links">
             <a href="pages/services.html">Services</a>
-            <a href="pages/shop.html">Shop</a>
-            <a href="pages/silverstore.html">Store</a>
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle" aria-expanded="false">Resources</button>
+                <div class="nav-dropdown-menu">
+                    <a href="pages/shop.html">Shop</a>
+                    <a href="pages/silverstore.html">Store</a>
+                    <a href="pages/store-browse.html">Apps</a>
+                </div>
+            </div>
             <a href="pages/login.html">Login</a>
         </div>
     </nav>
@@ -27,10 +46,10 @@
             <h1>Future-ready electrical and telecom solutions.</h1>
             <p>Silvertech blends premium digital delivery with real-world field expertise for modern businesses.</p>
             <div class="hero-actions">
-                <a class="btn btn-primary" href="pages/services.html">Explore Services</a>
-                <a class="btn btn-secondary btn-icon" href="pages/shop.html"><span class="icon icon-cart"></span> Visit Shop</a>
-                <a class="btn btn-secondary btn-icon" href="pages/silverstore.html"><span class="icon icon-home"></span> Open Store</a>
-                <a class="btn btn-secondary btn-icon" href="pages/store-browse.html"><span class="icon icon-mobile"></span> View Apps</a>
+                <a class="btn btn-primary btn-large" href="pages/services.html">Request Service</a>
+                <a class="btn btn-ghost btn-icon" href="pages/shop.html"><span class="icon icon-cart"></span> Shop</a>
+                <a class="btn btn-ghost btn-icon" href="pages/silverstore.html"><span class="icon icon-home"></span> Developer Store</a>
+                <a class="btn btn-ghost btn-icon" href="pages/store-browse.html"><span class="icon icon-mobile"></span> Apps</a>
             </div>
         </div>
     </header>
@@ -38,14 +57,17 @@
     <main class="page-shell">
         <section class="feature-grid">
             <article class="feature-card">
+                <span class="feature-icon" data-lucide="shield"></span>
                 <h2>Authentication & Access</h2>
                 <p>Protected downloads and service requests keep premium experiences available only to verified users.</p>
             </article>
             <article class="feature-card">
+                <span class="feature-icon" data-lucide="database"></span>
                 <h2>Dynamic Service Delivery</h2>
                 <p>Service listings are pulled from Firestore so updates can be made without touching the frontend code.</p>
             </article>
             <article class="feature-card">
+                <span class="feature-icon" data-lucide="shopping-bag"></span>
                 <h2>Freemium Store Experience</h2>
                 <p>Public discovery, gated downloads, and a polished interface turn visitors into productive users.</p>
             </article>
@@ -53,7 +75,10 @@
     </main>
 
     <script src="js/load-firebase-config.js?v=20260627"></script>
+    <script src="js/register-sw.js"></script>
     <script type="module" src="js/firebase-init.js?v=20260627"></script>
     <script type="module" src="js/auth-nav.js?v=20260627"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

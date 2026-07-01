@@ -12,7 +12,7 @@ body {
     margin: 0;
     background: radial-gradient(circle at top, #122033 0%, var(--deep-space) 60%);
     color: #f5f7fb;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
 }
 
@@ -246,18 +246,162 @@ a { color: var(--neon-blue); text-decoration: none; }
 }
 
 .hero {
-    padding: 150px 20px;
+    padding: 140px 20px 100px;
     text-align: center;
-    background-image: linear-gradient(rgba(10, 14, 20, 0.8), rgba(10, 14, 20, 0.8)), url('../img/silverbackground.png');
+    background-image: linear-gradient(rgba(10, 14, 20, 0.88), rgba(10, 14, 20, 0.88)), url('../img/silverbackground.png');
     background-size: cover;
     background-position: center;
 }
 
-.service-top {
-    display: flex;
-    justify-content: space-between;
+.hero-content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 14px;
+}
+
+h1, h2, h3 {
+    color: var(--neon-blue);
+    letter-spacing: 0.05em;
+}
+
+.feature-grid {
+    gap: 24px;
+    padding: 40px 0 60px;
+}
+
+.feature-card {
+    padding: 30px 28px;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 24px 48px rgba(0, 212, 255, 0.14);
+}
+
+.feature-card {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.feature-icon {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 18px;
+    border-radius: 16px;
+    background: rgba(0, 212, 255, 0.08);
+    color: var(--neon-blue);
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+}
+
+.btn-large {
+    padding: 14px 24px;
+    font-size: 1rem;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--silver);
+}
+
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--neon-blue);
+}
+
+.top-nav {
+    padding: 22px 28px;
+    gap: 20px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    color: var(--silver);
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.nav-dropdown-toggle:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    display: none;
+    flex-direction: column;
+    background: rgba(10, 14, 20, 0.98);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 10px 0;
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.28);
+    z-index: 10;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+    display: flex;
+}
+
+.nav-dropdown-menu a {
+    padding: 10px 18px;
+    color: var(--silver);
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-menu a:hover {
+    color: var(--neon-blue);
+    background: rgba(255,255,255,0.04);
+}
+
+.page-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+}
+
+.page-hero {
+    margin-bottom: 40px;
+}
+
+@media (max-width: 700px) {
+    .nav-dropdown-menu {
+        right: auto;
+        left: 0;
+        width: 100%;
+    }
+
+    .hero-actions {
+        gap: 12px;
+    }
 }
 
 .pill {

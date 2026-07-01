@@ -1,0 +1,16 @@
+{
+  "name": "Silvertech Electrical",
+  "short_name": "Silvertech",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#0a0e14",
+  "description": "Secure electrical and telecom services with Firebase-backed authentication and Firestore-powered content.",
+  "icons": [
+    {
+      "src": "assets/img/silvertech_logo.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

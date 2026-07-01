@@ -1,13 +1,22 @@
 // Try to load /firebase-config.js from site root, fallback to gh-pages raw file if missing.
 (function loadFirebaseConfig(){
-  // Determine repository base from URL path (for GitHub Pages project sites)
-  const pathParts = (location.pathname || '').split('/').filter(Boolean);
-  const repoBase = pathParts.length ? `/${pathParts[0]}` : '';
-  const candidateUrls = [];
-
-  if (repoBase) {
-    candidateUrls.push(`${location.origin}${repoBase}/firebase-config.js`);
+  // Determine repository base using the loader script's own URL when possible.
+  // This is more reliable than location.pathname because pages may be served
+  // from different base paths (user site vs project site).
+  let repoBase = '';
+  try {
+    const scriptUrl = document.currentScript && document.currentScript.src;
+    if (scriptUrl) {
+      const p = new URL(scriptUrl).pathname; // e.g. /silvertech-website/js/load-firebase-config.js
+      const idx = p.indexOf('/js/');
+      if (idx !== -1) repoBase = p.substring(0, idx);
+    }
+  } catch (e) {
+    repoBase = '';
   }
+
+  const candidateUrls = [];
+  if (repoBase) candidateUrls.push(`${location.origin}${repoBase}/firebase-config.js`);
   // Try site-root path too (useful for user/org pages or if repo deployed at root)
   candidateUrls.push(`${location.origin}/firebase-config.js`);
   // final fallback: raw gh-pages branch

@@ -10,15 +10,15 @@
     <meta property="og:image" content="assets/img/silvertech_logo.ico">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/x-icon" href="assets/img/silvertech_logo.ico">
-    <link rel="apple-touch-icon" href="assets/img/silvertech_logo.ico">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/x-icon" href="./assets/img/silvertech_logo.ico">
+    <link rel="apple-touch-icon" href="./assets/img/silvertech_logo.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="preconnect" href="https://www.googleapis.com">
-    <link rel="stylesheet" href="assets/css/style.css?v=20260627">
+    <link rel="stylesheet" href="./assets/css/style.css?v=20260627">
 </head>
 <body>
     <nav class="top-nav">
@@ -74,15 +74,26 @@
         </section>
     </main>
 
-    <script src="js/load-firebase-config.js?v=20260627"></script>
-    <script src="js/register-sw.js"></script>
-    <script type="module" src="js/firebase-init.js?v=20260627"></script>
-    <script type="module" src="js/auth-nav.js?v=20260627"></script>
+    <script src="./js/load-firebase-config.js?v=20260627"></script>
+    <script src="./js/register-sw.js"></script>
+    <script type="module" src="./js/firebase-init.js?v=20260627"></script>
+    <script type="module" src="./js/auth-nav.js?v=20260627"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js"></script>
     <script>
-        if (window.lucide && typeof window.lucide.createIcons === 'function') {
-            window.lucide.createIcons();
-        } else {
+        window.addEventListener('load', function() {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                try {
+                    window.lucide.createIcons();
+                } catch (e) {
+                    console.warn('Lucide icon initialization failed:', e);
+                    applyFallbackIcons();
+                }
+            } else {
+                applyFallbackIcons();
+            }
+        });
+        
+        function applyFallbackIcons() {
             document.querySelectorAll('[data-lucide]').forEach((icon) => {
                 const name = icon.getAttribute('data-lucide');
                 const fallbackIcons = {

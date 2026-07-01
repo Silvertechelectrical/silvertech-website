@@ -1,13 +1,15 @@
 name: Deploy to GitHub Pages
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   deploy:
@@ -55,3 +57,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           publish_branch: gh-pages
+
+      - name: Ensure GitHub Pages source is set to gh-pages root
+        run: |
+          curl -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pages \
+            -d '{"source":{"branch":"gh-pages","path":"/"}}'

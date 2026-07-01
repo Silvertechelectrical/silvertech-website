@@ -24,7 +24,10 @@
     }
 
     candidates.push(`${origin}/firebase-config.js`);
-    candidates.push('https://raw.githubusercontent.com/Brianwgitau/silvertech-website/gh-pages/firebase-config.js');
+    // Try raw GitHub URLs for the repo under the current owner's account as a fallback.
+    // Updated to use the current GitHub username 'Silvertechelectrical'.
+    candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/gh-pages/firebase-config.js');
+    candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/main/firebase-config.js');
 
     return [...new Set(candidates)];
   }

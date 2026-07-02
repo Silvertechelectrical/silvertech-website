@@ -21,7 +21,10 @@ async function updateShopManageButton(user) {
   }
 }
 
-onAuthStateChanged(auth, updateShopManageButton);
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  updateShopManageButton(user);
+});
 
 const fallbackItems = [
   {
@@ -54,6 +57,7 @@ const fallbackItems = [
 ];
 
 let allItems = [];
+let currentUser = null;
 
 function saveHistory(name, type) {
   const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
@@ -98,7 +102,9 @@ function renderShopItems(items) {
     return;
   }
 
-  items.forEach((item) => {
+  const uniqueItems = Array.from(new Map(items.map((item) => [item.id || item.name, item])).values());
+
+  uniqueItems.forEach((item) => {
     const card = document.createElement('article');
     const rating = Number(item.rating || 0);
     const displayRating = Number.isFinite(rating) ? rating.toFixed(1) : '4.5';
@@ -113,19 +119,35 @@ function renderShopItems(items) {
       </div>
       <p class="meta">${item.category}</p>
       <p>${item.description || 'Premium resource.'}</p>
-      <p class="meta">Format: ${item.downloadFormat || 'Digital'}</p>
-      <p><strong>${item.price} KSH</strong></p>
+      <div class="meta-badges">
+        <span class="meta-badge">Format: ${item.downloadFormat || 'Digital'}</span>
+      </div>
+      <div class="service-price">${item.price} KSH</div>
       <div class="stars" aria-label="Rating ${displayRating}">
-        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}">★</button>`).join('')}
+        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}" aria-label="Rate ${value} stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.75l2.56 5.2 5.74.83-4.15 4.04 1.0 5.68L12 15.98 6.85 18.5l1.0-5.68L3.7 8.78l5.74-.83L12 2.75Z"/></svg></button>`).join('')}
         <span class="small">${displayRating}</span>
       </div>
       <button class="request-btn">Purchase Now</button>
     `;
 
     card.querySelector('.request-btn').addEventListener('click', () => {
-      document.getElementById('purchase-panel').classList.remove('hidden');
-      document.getElementById('purchase-item-name').value = item.name;
-      window.scrollTo({ top: document.getElementById('purchase-panel').offsetTop, behavior: 'smooth' });
+      const drawer = document.getElementById('purchase-drawer');
+      const select = document.getElementById('purchase-item-name');
+      const emailInput = document.getElementById('purchase-email');
+      const phoneInput = document.getElementById('purchase-phone');
+      if (drawer) {
+        drawer.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+      }
+      if (select) {
+        select.value = item.name;
+      }
+      if (emailInput && currentUser?.email) {
+        emailInput.value = currentUser.email;
+      }
+      if (phoneInput && currentUser?.phoneNumber) {
+        phoneInput.value = currentUser.phoneNumber;
+      }
     });
 
     card.querySelectorAll('.star-btn').forEach((btn) => {
@@ -189,6 +211,16 @@ function populatePurchaseOptions(items) {
   select.innerHTML = '<option value="">Select an item</option>' + items.map((item) => `
     <option value="${item.name}">${item.name} (${item.price} KSH)</option>
   `).join('');
+}
+
+const drawer = document.getElementById('purchase-drawer');
+if (drawer) {
+  drawer.querySelectorAll('[data-close-drawer]').forEach((control) => {
+    control.addEventListener('click', () => {
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+    });
+  });
 }
 
 loadShopItems();

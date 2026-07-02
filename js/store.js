@@ -10,13 +10,17 @@ const cloudinaryConfig = window.CLOUDINARY_CONFIG || {
 
 const registrationForm = document.getElementById('registration-form');
 const registrationStatus = document.getElementById('registration-status');
+const statusBanner = document.getElementById('developer-status-banner');
 const uploadPanel = document.getElementById('developer-upload-panel');
+const registerButton = document.getElementById('register-developer-button');
 const approvalPanel = document.getElementById('developer-approval-panel');
 const applicationsList = document.getElementById('developer-applications-list');
 const uploadForm = document.getElementById('developer-upload-form');
 const statusEl = document.getElementById('developer-upload-status');
 const uploadActionButton = document.getElementById('store-upload-action');
 const verifyActionButton = document.getElementById('store-verify-action');
+const registrationName = document.getElementById('reg-name');
+const registrationEmail = document.getElementById('reg-email');
 
 let currentUser = null;
 let isAdmin = false;
@@ -37,24 +41,37 @@ async function loadDeveloperApplications() {
 
     applicationsList.innerHTML = '';
 
+    const table = document.createElement('table');
+    table.className = 'developer-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Applicant Name</th>
+          <th>Email Address</th>
+          <th>M-Pesa Reference</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
     applications.forEach((application) => {
-      const card = document.createElement('article');
-      card.className = 'service-card';
-      card.innerHTML = `
-        <div class="service-top">
-          <h3>${application.name}</h3>
-          <span class="pill">${application.status}</span>
-        </div>
-        <p class="meta">${application.email}</p>
-        <p>${application.phone}</p>
-        <p class="small">Payment reference: ${application.paymentReference}</p>
-        <div class="action-row">
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${application.name}</td>
+        <td>${application.email}</td>
+        <td>${application.paymentReference}</td>
+        <td>
           <button class="btn btn-secondary approve-btn" type="button">Approve</button>
-          <button class="btn btn-secondary reject-btn" type="button">Reject</button>
-        </div>
+          <button class="btn btn-outline reject-btn" type="button">Reject</button>
+        </td>
       `;
 
-      const approveBtn = card.querySelector('.approve-btn');
+      tbody.appendChild(row);
+
+      const approveBtn = row.querySelector('.approve-btn');
       approveBtn.addEventListener('click', async () => {
         if (!currentUser) return;
         try {
@@ -82,7 +99,7 @@ async function loadDeveloperApplications() {
         }
       });
 
-      const rejectBtn = card.querySelector('.reject-btn');
+      const rejectBtn = row.querySelector('.reject-btn');
       rejectBtn.addEventListener('click', async () => {
         if (!currentUser) return;
         try {
@@ -97,8 +114,9 @@ async function loadDeveloperApplications() {
         }
       });
 
-      applicationsList.appendChild(card);
     });
+
+    applicationsList.appendChild(table);
   } catch (error) {
     console.error('Failed to load developer applications:', error);
     applicationsList.innerHTML = '<p class="small">Unable to load applications. Please try again later.</p>';
@@ -114,7 +132,14 @@ async function updateDeveloperAccess(user) {
   if (verifyActionButton) verifyActionButton.classList.add('hidden');
   if (statusEl) statusEl.textContent = '';
 
+  if (registerButton) {
+    registerButton.classList.toggle('hidden', Boolean(user));
+  }
+
   if (!user) {
+    if (statusBanner) {
+      statusBanner.classList.add('hidden');
+    }
     return;
   }
 
@@ -138,6 +163,16 @@ async function updateDeveloperAccess(user) {
       await loadDeveloperApplications();
     }
 
+    if (statusBanner) {
+      if (isDeveloper || isAdmin) {
+        statusBanner.textContent = isAdmin ? 'Account Status: Registered Creator' : 'Account Status: Registered Creator';
+        statusBanner.classList.remove('hidden');
+      } else {
+        statusBanner.textContent = 'Account Status: Pending Verification';
+        statusBanner.classList.remove('hidden');
+      }
+    }
+
     if (!isDeveloper && !isAdmin && statusEl) {
       statusEl.textContent = 'Only approved developers or admin users can upload assets.';
     }
@@ -150,6 +185,14 @@ async function updateDeveloperAccess(user) {
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
+  if (user && registrationName && registrationEmail) {
+    registrationName.value = user.displayName || '';
+    registrationEmail.value = user.email || '';
+    registrationName.classList.add('locked-input');
+    registrationEmail.classList.add('locked-input');
+    registrationName.setAttribute('disabled', 'disabled');
+    registrationEmail.setAttribute('disabled', 'disabled');
+  }
   await updateDeveloperAccess(user);
 });
 

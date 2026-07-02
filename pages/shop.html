@@ -24,10 +24,10 @@
             <span>Silvertech</span>
         </a>
         <div class="nav-links">
-            <a href="services.html">Services</a>
-            <a href="shop.html">Shop</a>
-            <a href="silverstore.html">Store</a>
-            <a href="login.html">Login</a>
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="silverstore.html">Store</a>
+            <a class="btn btn-outline" href="login.html">Login</a>
         </div>
     </nav>
 
@@ -38,26 +38,36 @@
             </div>
             <h1>Silvertech Shop</h1>
             <p>Browse and purchase premium digital assets, templates, and field-ready resources.</p>
-            <input id="shop-search" class="search-bar" type="text" placeholder="Search items...">
+            <div class="search-shell">
+                <span class="search-icon" aria-hidden="true">🔎</span>
+                <input id="shop-search" class="search-bar" type="text" placeholder="Search items...">
+            </div>
         </section>
 
         <section id="shop-items" class="services-grid"></section>
 
-        <section id="purchase-panel" class="request-panel hidden">
-            <h2>Purchase Item</h2>
-            <p>Select an item and provide your contact details.</p>
-            <form id="purchase-form">
-                <label class="small" for="purchase-item-name">Item</label>
-                <select id="purchase-item-name" title="Select an item" required>
-                    <option value="">Select an item</option>
-                </select>
-                <input id="purchase-email" type="email" placeholder="Your email" required>
-                <input id="purchase-phone" type="tel" placeholder="Your phone number" required>
-                <button type="submit">Request Purchase</button>
-            </form>
-            <p id="purchase-status" class="status-message"></p>
-        </section>
     </main>
+
+    <div id="purchase-drawer" class="purchase-drawer" aria-hidden="true">
+        <div class="purchase-drawer-backdrop" data-close-drawer></div>
+        <div class="purchase-drawer-content">
+            <button type="button" class="drawer-close" data-close-drawer aria-label="Close purchase drawer">✕</button>
+            <section id="purchase-panel" class="request-panel">
+                <h2>Purchase Item</h2>
+                <p>Select an item and provide your contact details.</p>
+                <form id="purchase-form">
+                    <label class="small" for="purchase-item-name">Item</label>
+                    <select id="purchase-item-name" title="Select an item" required>
+                        <option value="">Select an item</option>
+                    </select>
+                    <input id="purchase-email" type="email" placeholder="Your email" required>
+                    <input id="purchase-phone" type="tel" placeholder="Your phone number" required>
+                    <button type="submit">Request Purchase</button>
+                </form>
+                <p id="purchase-status" class="status-message"></p>
+            </section>
+        </div>
+    </div>
 
     <script src="../js/load-firebase-config.js"></script>
     <script src="../js/register-sw.js"></script>

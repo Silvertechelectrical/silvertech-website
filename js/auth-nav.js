@@ -6,11 +6,27 @@ const navLinks = document.querySelector('.nav-links');
 const isPageRoute = window.location.pathname.includes('/pages/');
 const loginHref = isPageRoute ? 'login.html' : 'pages/login.html';
 const adminHref = isPageRoute ? 'admin.html' : 'pages/admin.html';
+const currentPageName = window.location.pathname.split('/').pop();
+const heroState = document.getElementById('hero-user-state');
+
+function updateHeroGreeting(user) {
+  if (!heroState) return;
+  if (!user) {
+    heroState.classList.add('hidden');
+    heroState.textContent = '';
+    return;
+  }
+
+  const displayName = user.displayName || user.email || 'there';
+  heroState.textContent = `Welcome back, ${displayName}`;
+  heroState.classList.remove('hidden');
+}
 
 function createLoginLink() {
   const link = document.createElement('a');
   link.href = loginHref;
   link.id = 'nav-login-link';
+  link.className = 'btn btn-outline';
   link.textContent = 'Login';
   return link;
 }
@@ -19,11 +35,13 @@ function createAdminLink() {
   const link = document.createElement('a');
   link.href = adminHref;
   link.id = 'nav-admin-link';
-  link.textContent = 'Admin';
+  link.className = 'nav-admin-link';
+  link.setAttribute('aria-label', 'Admin settings');
+  link.textContent = '⚙';
   return link;
 }
 
-function createUserNav(user) {
+function createUserNav(user, isAdmin = false) {
   const wrapper = document.createElement('span');
   wrapper.className = 'nav-user';
 
@@ -44,6 +62,11 @@ function createUserNav(user) {
       .join('')
       .toUpperCase();
     wrapper.appendChild(initials);
+  }
+
+  if (isAdmin) {
+    const adminBadge = createAdminLink();
+    wrapper.appendChild(adminBadge);
   }
 
   const emailLabel = document.createElement('span');
@@ -87,7 +110,11 @@ async function updateNav(user) {
   if (existingAdmin) existingAdmin.remove();
   if (existingLogin) existingLogin.remove();
 
-  navLinks.querySelectorAll('a').forEach((anchor) => {
+  navLinks.querySelectorAll('a, button').forEach((anchor) => {
+    const href = anchor.getAttribute('href');
+    if (href && href.endsWith(currentPageName)) {
+      anchor.classList.add('hidden');
+    }
     if (anchor.textContent.trim().toLowerCase() === 'login') {
       anchor.remove();
     }
@@ -95,15 +122,13 @@ async function updateNav(user) {
 
   if (user) {
     const isAdmin = await isAdminUser(user);
-    if (isAdmin) {
-      navLinks.appendChild(createAdminLink());
-    }
-    navLinks.appendChild(createUserNav(user));
+    navLinks.appendChild(createUserNav(user, isAdmin));
   } else {
     navLinks.appendChild(createLoginLink());
   }
 }
 
 onAuthStateChanged(auth, async (user) => {
+  updateHeroGreeting(user);
   await updateNav(user);
 });

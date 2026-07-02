@@ -9,6 +9,7 @@ import {
   orderBy,
   serverTimestamp,
   deleteDoc,
+  updateDoc,
   doc
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
@@ -21,8 +22,10 @@ const logoutBtn = document.getElementById('logoutBtn');
 const serviceForm = document.getElementById('admin-service-form');
 const serviceStatus = document.getElementById('admin-service-status');
 const servicesList = document.getElementById('admin-services-list');
+const adminMetrics = document.getElementById('admin-metrics');
 
 let currentUser = null;
+let editingServiceId = null;
 
 function showSection(section) {
   [adminLoading, adminUnauthenticated, adminUnauthorized, adminShell].forEach((el) => {
@@ -32,6 +35,35 @@ function showSection(section) {
 
   if (section) {
     section.classList.remove('hidden');
+  }
+}
+
+function populateServiceForm(service) {
+  if (!serviceForm) return;
+  document.getElementById('service-name').value = service.name || '';
+  document.getElementById('service-category').value = service.category || '';
+  document.getElementById('service-price').value = service.price || '';
+  document.getElementById('service-delivery').value = service.delivery || '';
+  document.getElementById('service-description').value = service.description || '';
+  document.getElementById('service-featured').checked = Boolean(service.featured);
+  editingServiceId = service.id || null;
+  const submitButton = serviceForm.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.textContent = editingServiceId ? 'Update Service' : 'Save Service';
+  }
+}
+
+async function loadAdminMetrics() {
+  if (!adminMetrics) return;
+
+  try {
+    const pendingDevelopers = await getDocs(query(collection(db, 'developer-applications'), where('status', '==', 'pending')));
+    const pendingRequests = await getDocs(query(collection(db, 'requests'), where('status', '==', 'pending')));
+    adminMetrics.innerHTML = `● ${pendingDevelopers.size} Pending Developer Approvals • ${pendingRequests.size} New Service Requests`;
+    adminMetrics.classList.remove('hidden');
+  } catch (error) {
+    console.error('Failed to load admin metrics:', error);
+    adminMetrics.classList.add('hidden');
   }
 }
 
@@ -46,13 +78,16 @@ function renderServiceCards(items) {
   servicesList.innerHTML = items
     .map((service) => `
       <article class="service-card">
+        <div class="catalog-card-actions">
+          <button class="catalog-action edit-btn" data-edit-id="${service.id}" type="button" aria-label="Edit service">✎</button>
+          <button class="catalog-action delete-btn" data-id="${service.id}" type="button" aria-label="Delete service">✕</button>
+        </div>
         <div class="service-top">
           <h3>${service.name}</h3>
         </div>
         <p class="meta">${service.category}</p>
         <p>${service.description}</p>
         <p class="meta">Price: ${service.price} KSH</p>
-        <button class="btn btn-secondary" data-id="${service.id}" type="button">Delete</button>
       </article>
     `)
     .join('');
@@ -69,6 +104,17 @@ function renderServiceCards(items) {
       } catch (error) {
         serviceStatus.textContent = error.message;
       }
+    });
+  });
+
+  servicesList.querySelectorAll('button[data-edit-id]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const serviceId = button.dataset.editId;
+      const service = items.find((item) => item.id === serviceId);
+      if (!service) return;
+      populateServiceForm(service);
+      serviceForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      serviceStatus.textContent = `Editing ${service.name}.`;
     });
   });
 }
@@ -124,6 +170,7 @@ onAuthStateChanged(auth, async (user) => {
   adminWelcome.textContent = `Welcome, ${user.email}`;
   showSection(adminShell);
   await loadAdminServices();
+  await loadAdminMetrics();
 });
 
 if (logoutBtn) {
@@ -150,20 +197,39 @@ if (serviceForm) {
     }
 
     try {
-      await addDoc(collection(db, 'services'), {
-        name,
-        category,
-        price,
-        delivery,
-        description,
-        featured,
-        rating: 4.5,
-        createdAt: serverTimestamp()
-      });
+      if (editingServiceId) {
+        await updateDoc(doc(db, 'services', editingServiceId), {
+          name,
+          category,
+          price,
+          delivery,
+          description,
+          featured,
+          updatedAt: serverTimestamp()
+        });
+        serviceStatus.textContent = 'Service updated successfully.';
+      } else {
+        await addDoc(collection(db, 'services'), {
+          name,
+          category,
+          price,
+          delivery,
+          description,
+          featured,
+          rating: 4.5,
+          createdAt: serverTimestamp()
+        });
+        serviceStatus.textContent = 'Service saved successfully.';
+      }
 
-      serviceStatus.textContent = 'Service saved successfully.';
       serviceForm.reset();
+      editingServiceId = null;
+      const submitButton = serviceForm.querySelector('button[type="submit"]');
+      if (submitButton) {
+        submitButton.textContent = 'Save Service';
+      }
       await loadAdminServices();
+      await loadAdminMetrics();
     } catch (error) {
       serviceStatus.textContent = error.message;
     }

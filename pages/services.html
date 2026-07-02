@@ -24,10 +24,10 @@
             <span>Silvertech</span>
         </a>
         <div class="nav-links">
-            <a href="services.html">Services</a>
-            <a href="shop.html">Shop</a>
-            <a href="silverstore.html">Store</a>
-            <a href="login.html">Login</a>
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="silverstore.html">Store</a>
+            <a class="btn btn-outline" href="login.html">Login</a>
         </div>
     </nav>
 
@@ -38,7 +38,10 @@
             </div>
             <h1>Professional Services</h1>
             <p>Search by category or request a consultation for premium field support.</p>
-            <input id="service-search" class="search-bar" type="text" placeholder="Search services or categories">
+            <div class="search-shell">
+                <span class="search-icon" aria-hidden="true">🔎</span>
+                <input id="service-search" class="search-bar" type="text" placeholder="Search services or categories">
+            </div>
         </section>
 
         <section id="services-list" class="services-grid"></section>

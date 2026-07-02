@@ -24,10 +24,10 @@
             <span>Silvertech</span>
         </a>
         <div class="nav-links">
-            <a href="services.html">Services</a>
-            <a href="shop.html">Shop</a>
-            <a href="silverstore.html">Store</a>
-            <a href="login.html">Login</a>
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="silverstore.html">Store</a>
+            <a class="btn btn-outline" href="login.html">Login</a>
         </div>
     </nav>
 
@@ -36,12 +36,12 @@
             <div class="hero-actions">
                 <a class="btn btn-secondary hidden" id="store-upload-action" href="#developer-upload-panel">Upload App</a>
                 <a class="btn btn-secondary hidden" id="store-verify-action" href="#developer-approval-panel">Verify Developers</a>
-                <a class="btn btn-primary" href="#developer-registration">Register as Developer (300 KSH)</a>
+                <a class="btn btn-primary" id="register-developer-button" href="#developer-registration">Register as Developer (300 KSH)</a>
                 <a class="btn btn-secondary btn-icon" href="store-browse.html"><span class="icon icon-mobile"></span> Browse Apps</a>
-                <a class="btn btn-secondary btn-icon" href="login.html">Admin Login</a>
             </div>
             <h1>SilverStore for Developers</h1>
             <p>Register with your email, pay a one-time fee, and get approved to upload apps or digital assets to the public store.</p>
+            <div id="developer-status-banner" class="status-banner hidden" role="status"></div>
         </section>
 
         <section class="feature-grid">
@@ -65,6 +65,11 @@
             <h2>Developer Registration</h2>
             <p class="small">Send the 300 KSH fee manually to <strong>Mpesa 0757069075</strong>. Then enter the Mpesa payment reference below.</p>
             <p class="small">Use the same email here as the one you will sign in with. Approval is granted by email, so matching email is required.</p>
+            <div class="stepper">
+                <div class="step"><strong>Step 1:</strong> Send 300 KSH via M-Pesa to 0757069075.</div>
+                <div class="step"><strong>Step 2:</strong> Enter your phone number and transaction reference below.</div>
+                <div class="step"><strong>Step 3:</strong> Submit and await manual activation notification.</div>
+            </div>
             <form id="registration-form">
                 <label class="small" for="reg-name">Full Name *</label>
                 <input id="reg-name" type="text" placeholder="Your full name" required>
@@ -102,8 +107,11 @@
                 <label class="small" for="developer-price">Price (KSH)</label>
                 <input id="developer-price" type="number" placeholder="3000" min="0" required>
 
-                <label class="small" for="developer-file">Choose file *</label>
-                <input id="developer-file" type="file" required>
+                <label class="small" for="developer-file">Asset File *</label>
+                <label class="dropzone" for="developer-file">
+                    <span>Drag &amp; drop asset file here or click to browse.</span>
+                    <input id="developer-file" type="file" required>
+                </label>
 
                 <label class="small" for="developer-description">Description *</label>
                 <textarea id="developer-description" placeholder="Short description" rows="4"></textarea>

@@ -24,10 +24,10 @@
             <span>Silvertech</span>
         </a>
         <div class="nav-links">
-            <a href="services.html">Services</a>
-            <a href="shop.html">Shop</a>
-            <a href="silverstore.html">Store</a>
-            <a href="login.html">Login</a>
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="silverstore.html">Store</a>
+            <a class="btn btn-outline" href="login.html">Login</a>
         </div>
     </nav>
 
@@ -36,6 +36,7 @@
             <h1>Silvertech Admin Panel</h1>
             <p class="small">Manage services, view requests, and keep your admin workflow secure.</p>
             <p id="admin-welcome" class="small"></p>
+            <div id="admin-metrics" class="status-banner hidden" role="status"></div>
         </section>
 
         <section id="admin-loading" class="auth-card">
@@ -74,7 +75,7 @@
 
             <section class="panel">
                 <h2>Add a New Service</h2>
-                <form id="admin-service-form">
+                <form id="admin-service-form" class="admin-form-shell">
                     <input id="service-name" placeholder="Service name" required>
                     <select id="service-category" title="Service category" required>
                         <option value="">Select category</option>

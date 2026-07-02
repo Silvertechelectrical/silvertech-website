@@ -99,7 +99,9 @@ function renderServices(items) {
     return;
   }
 
-  items.forEach((service) => {
+  const uniqueItems = Array.from(new Map(items.map((service) => [service.id || service.name, service])).values());
+
+  uniqueItems.forEach((service) => {
     const card = document.createElement('article');
     const rating = Number(service.rating || 0);
     const displayRating = Number.isFinite(rating) ? rating.toFixed(1) : '4.5';
@@ -115,9 +117,9 @@ function renderServices(items) {
       <p class="meta">${service.category}</p>
       <p>${service.description || 'Premium professional delivery.'}</p>
       <p class="meta">Delivery: ${service.delivery || 'Scheduled'}</p>
-      <p><strong>${service.price} KSH</strong></p>
+      <div class="service-price">${service.price} KSH</div>
       <div class="stars" aria-label="Rating ${displayRating}">
-        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}">★</button>`).join('')}
+        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}" aria-label="Rate ${value} stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.75l2.56 5.2 5.74.83-4.15 4.04 1.0 5.68L12 15.98 6.85 18.5l1.0-5.68L3.7 8.78l5.74-.83L12 2.75Z"/></svg></button>`).join('')}
         <span class="small">${displayRating}</span>
       </div>
       <button class="request-btn">Request Service</button>
@@ -133,6 +135,10 @@ function renderServices(items) {
       const phone = prompt('Enter your phone number to submit this service request:');
       if (phone) {
         await submitServiceRequest(service.name, phone.trim());
+        const select = document.getElementById('request-service-name');
+        if (select) {
+          select.value = service.name;
+        }
       }
     });
     card.querySelectorAll('.star-btn').forEach((btn) => {

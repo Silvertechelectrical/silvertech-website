@@ -1,10 +1,11 @@
-const CACHE_NAME = 'silvertech-cache-v3';
+const CACHE_NAME = 'silvertech-cache-v4';
 const BASE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '/';
 const normalize = (path) => (BASE_PATH.endsWith('/') ? `${BASE_PATH}${path.replace(/^[\/]+/, '')}` : `${BASE_PATH}/${path.replace(/^[\/]+/, '')}`);
 const ASSETS_TO_CACHE = [
   normalize('index.html'),
   normalize('manifest.json'),
   normalize('assets/css/style.css?v=20260702'),
+  normalize('assets/js/lucide.min.js?v=20260702'),
   normalize('assets/img/silvertech_logo.ico'),
   normalize('assets/img/silverbackground.png'),
   normalize('assets/img/usablesilvertech.jpg'),
@@ -39,6 +40,12 @@ self.addEventListener('activate', (event) => {
       )
     ).then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (event) => {

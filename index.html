@@ -108,9 +108,9 @@
                                     }
                                 })();
 
-                                const candidates = [
-                                        './assets/js/lucide.min.js',
-                                        `${location.origin}${repoBase}/assets/js/lucide.min.js`,
+const baseAssetUrl = repoBase ? `${location.origin}${repoBase}` : location.origin;
+                const candidates = [
+                    `${baseAssetUrl}/assets/js/lucide.min.js`,
                                         `${location.origin}/assets/js/lucide.min.js`,
                                         'https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js',
                                         'https://unpkg.com/lucide@0.484.0/dist/lucide.min.js'

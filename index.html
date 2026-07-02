@@ -92,35 +92,61 @@
     <script src="./js/register-sw.js?v=20260702"></script>
     <script type="module" src="./js/firebase-init.js?v=20260702"></script>
     <script type="module" src="./js/auth-nav.js?v=20260702"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js" crossorigin="anonymous"></script>
-    <script>
-        window.addEventListener('load', function() {
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                try {
-                    window.lucide.createIcons();
-                } catch (e) {
-                    console.warn('Lucide icon initialization failed:', e);
-                    applyFallbackIcons();
+        <script>
+            // Try loading lucide from multiple CDNs; fall back to inline icons if none load.
+            (function loadLucide() {
+                const candidates = [
+                    'https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js',
+                    'https://unpkg.com/lucide@0.484.0/dist/lucide.min.js'
+                ];
+
+                function tryLoad(idx) {
+                    if (idx >= candidates.length) {
+                        console.warn('Lucide not available from CDN; using fallback icons.');
+                        applyFallbackIcons();
+                        return;
+                    }
+
+                    const src = candidates[idx];
+                    const s = document.createElement('script');
+                    s.src = src;
+                    s.crossOrigin = 'anonymous';
+                    s.onload = () => {
+                        try {
+                            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                                window.lucide.createIcons();
+                            } else {
+                                applyFallbackIcons();
+                            }
+                        } catch (e) {
+                            console.warn('Lucide loaded but initialization failed:', e);
+                            applyFallbackIcons();
+                        }
+                    };
+                    s.onerror = () => {
+                        s.remove();
+                        tryLoad(idx + 1);
+                    };
+                    document.head.appendChild(s);
                 }
-            } else {
-                applyFallbackIcons();
+
+                window.addEventListener('load', () => tryLoad(0));
+            })();
+
+            function applyFallbackIcons() {
+                document.querySelectorAll('[data-lucide]').forEach((icon) => {
+                    const name = icon.getAttribute('data-lucide');
+                    const fallbackIcons = {
+                        shield: '🛡️',
+                        database: '🗄️',
+                        'shopping-bag': '🛍️',
+                        home: '🏠',
+                        cart: '🛒',
+                        mobile: '📱'
+                    };
+                    icon.textContent = fallbackIcons[name] || '•';
+                });
             }
-        });
-        
-        function applyFallbackIcons() {
-            document.querySelectorAll('[data-lucide]').forEach((icon) => {
-                const name = icon.getAttribute('data-lucide');
-                const fallbackIcons = {
-                    shield: '🛡️',
-                    database: '🗄️',
-                    'shopping-bag': '🛍️',
-                    home: '🏠',
-                    cart: '🛒',
-                    mobile: '📱'
-                };
-                icon.textContent = fallbackIcons[name] || '•';
-            });
-        }
-    </script>
+        </script>
 </body>
 </html>

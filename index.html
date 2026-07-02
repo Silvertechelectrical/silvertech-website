@@ -95,10 +95,26 @@
         <script>
             // Try loading lucide from multiple CDNs; fall back to inline icons if none load.
             (function loadLucide() {
-                const candidates = [
-                    'https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js',
-                    'https://unpkg.com/lucide@0.484.0/dist/lucide.min.js'
-                ];
+                                // prefer a local vendored copy when present, then try known CDNs
+                                const repoBase = (function() {
+                                    try {
+                                        const s = document.currentScript && document.currentScript.src;
+                                        if (!s) return '';
+                                        const p = new URL(s).pathname;
+                                        const idx = p.indexOf('/js/');
+                                        return idx !== -1 ? p.substring(0, idx) : '';
+                                    } catch (e) {
+                                        return '';
+                                    }
+                                })();
+
+                                const candidates = [
+                                        './assets/js/lucide.min.js',
+                                        `${location.origin}${repoBase}/assets/js/lucide.min.js`,
+                                        `${location.origin}/assets/js/lucide.min.js`,
+                                        'https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js',
+                                        'https://unpkg.com/lucide@0.484.0/dist/lucide.min.js'
+                                ];
 
                 function tryLoad(idx) {
                     if (idx >= candidates.length) {

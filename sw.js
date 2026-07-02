@@ -53,6 +53,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Treat runtime firebase-config.js as network-first so clients get the latest config
+  if (url.pathname.endsWith('/firebase-config.js') || url.pathname.endsWith('firebase-config.js')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
   if (url.pathname.endsWith('.html') || url.pathname === '/') {
     event.respondWith(
       fetch(request)

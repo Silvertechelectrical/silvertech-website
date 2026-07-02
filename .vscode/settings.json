@@ -1,8 +1,0 @@
-{
-    "github.copilot.chat.claudeAgent.useSdkExtension": true,
-    "github.copilot.chat.codesearch.enabled": true,
-    "github.copilot.chat.alternateGeminiModelFPrompt.enabled": true,
-    "github.copilot.chat.alternateGptPrompt.enabled": true,
-    "github.copilot.chat.anthropic.tools.websearch.enabled": true,
-    "github.copilot.chat.claude47OpusPrompt.enabled": true
-}

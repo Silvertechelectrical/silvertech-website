@@ -1,5 +1,4 @@
 :root {
-:root {
     --silver: #C0C0C0;
     --neon-blue: #00D4FF;
     --deep-space: #0a0e14;
@@ -43,6 +42,25 @@ a { color: var(--neon-blue); text-decoration: none; }
     color: var(--silver);
     letter-spacing: 0.06em;
     text-transform: uppercase;
+}
+
+.brand-logo {
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #00f2fe;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.brand-logo:hover {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+}
+
+.header-logout-btn {
+    margin-left: 4px;
 }
 
 .icon {
@@ -202,8 +220,8 @@ a { color: var(--neon-blue); text-decoration: none; }
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    min-width: 190px;
-    padding: 10px 14px;
+    min-width: 210px;
+    padding: 10px 12px;
     border-radius: 14px;
     background: rgba(10, 14, 20, 0.96);
     border: 1px solid rgba(0, 212, 255, 0.18);
@@ -216,6 +234,22 @@ a { color: var(--neon-blue); text-decoration: none; }
     transform: translateY(-6px);
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-soft);
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 212, 255, 0.16);
+    color: var(--neon-blue);
 }
 
 .nav-user.open .nav-user-email {
@@ -314,8 +348,8 @@ h1, h2, h3 {
 .panel,
 .auth-card,
 .admin-panel {
-    background: var(--surface);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(145deg, rgba(10, 14, 20, 0.96), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(148, 163, 184, 0.16);
     padding: 20px;
     border-radius: 18px;
     box-shadow: var(--shadow);
@@ -337,6 +371,11 @@ h1, h2, h3 {
     border-radius: 16px;
     background: rgba(0, 212, 255, 0.08);
     color: var(--neon-blue);
+}
+
+.feature-icon svg {
+    width: 24px;
+    height: 24px;
 }
 
 .hero-actions {
@@ -368,6 +407,11 @@ h1, h2, h3 {
 
 .btn-primary { background: var(--neon-blue); color: var(--deep-space); }
 .btn-secondary { border-color: var(--glass-border); color: var(--silver); background: rgba(255,255,255,0.04); }
+.btn-secondary-outline {
+    background: transparent;
+    color: var(--neon-blue);
+    border-color: rgba(0, 212, 255, 0.34);
+}
 .btn-outline {
     background: transparent;
     color: var(--neon-blue);
@@ -396,7 +440,7 @@ h1, h2, h3 {
 }
 
 .auth-card {
-    max-width: 460px;
+    max-width: 620px;
     margin: 60px auto;
 }
 
@@ -404,15 +448,65 @@ h1, h2, h3 {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.password-toggle {
+.checkbox-container {
     display: flex;
     align-items: center;
     gap: 8px;
+    justify-content: flex-start;
+    margin-top: 10px;
     color: var(--silver);
     font-size: 0.92rem;
-    margin-left: 2px;
+}
+
+.checkbox-container input {
+    width: auto;
+    margin: 0;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.google-btn:hover {
+    background-color: #1f2937;
+    border-color: rgba(0, 212, 255, 0.4);
+}
+
+.divider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 8px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.divider-row span {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+}
+
+.divider-row span:nth-child(2) {
+    flex: 0 0 auto;
+    height: auto;
+    background: transparent;
 }
 
 input, textarea, select {
@@ -458,16 +552,29 @@ button:hover { transform: translateY(-1px); background: var(--silver); }
     font-size: 0.8rem;
 }
 
+.meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 12px;
+}
+
 .meta-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 3px 8px;
+    padding: 3px 10px;
     border-radius: 999px;
     background: rgba(255,255,255,0.08);
     color: var(--text-soft);
     font-size: 0.82rem;
-    margin-right: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.format-badge {
+    background: rgba(0, 212, 255, 0.14);
+    color: var(--neon-blue);
+    border-color: rgba(0, 212, 255, 0.24);
 }
 
 .status-message { margin-top: 10px; color: var(--neon-blue); }
@@ -499,22 +606,31 @@ button:hover { transform: translateY(-1px); background: var(--silver); }
     align-items: center;
     justify-content: center;
     background: transparent;
-    color: #4b5563;
+    color: #64748b;
     padding: 0;
     width: 18px;
     height: 18px;
     border-radius: 0;
+    opacity: 0.6;
 }
-.star-btn.active { color: #fbbf24; }
+
+.star-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.star-btn.active { color: #fbbf24; opacity: 1; }
 
 .service-price {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin: 10px 0;
-    font-weight: 700;
+    margin: 12px 0 6px;
+    font-weight: 800;
     color: var(--neon-blue);
-    font-size: 1.1rem;
+    font-size: 1.16rem;
+    letter-spacing: 0.01em;
 }
 
 .request-btn {

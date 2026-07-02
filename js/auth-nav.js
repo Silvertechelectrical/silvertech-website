@@ -26,7 +26,7 @@ function createLoginLink() {
   const link = document.createElement('a');
   link.href = loginHref;
   link.id = 'nav-login-link';
-  link.className = 'btn btn-outline';
+  link.className = 'btn btn-primary nav-login-btn';
   link.textContent = 'Login';
   return link;
 }
@@ -34,10 +34,8 @@ function createLoginLink() {
 function createAdminLink() {
   const link = document.createElement('a');
   link.href = adminHref;
-  link.id = 'nav-admin-link';
-  link.className = 'nav-admin-link';
-  link.setAttribute('aria-label', 'Admin settings');
-  link.textContent = '⚙';
+  link.className = 'dropdown-item';
+  link.textContent = 'Admin Dashboard';
   return link;
 }
 
@@ -64,14 +62,17 @@ function createUserNav(user, isAdmin = false) {
     wrapper.appendChild(initials);
   }
 
+  const emailLabel = document.createElement('div');
+  emailLabel.className = 'nav-user-email';
+  const emailText = document.createElement('strong');
+  emailText.textContent = user.email || user.displayName || 'User';
+  emailLabel.appendChild(emailText);
+
   if (isAdmin) {
-    const adminBadge = createAdminLink();
-    wrapper.appendChild(adminBadge);
+    const adminLink = createAdminLink();
+    emailLabel.appendChild(adminLink);
   }
 
-  const emailLabel = document.createElement('span');
-  emailLabel.className = 'nav-user-email';
-  emailLabel.textContent = user.email || user.displayName || 'User';
   wrapper.appendChild(emailLabel);
 
   const logoutButton = document.createElement('button');
@@ -105,9 +106,7 @@ async function updateNav(user) {
 
   const existingLogin = navLinks.querySelector('#nav-login-link');
   const existingUser = navLinks.querySelector('.nav-user');
-  const existingAdmin = navLinks.querySelector('#nav-admin-link');
   if (existingUser) existingUser.remove();
-  if (existingAdmin) existingAdmin.remove();
   if (existingLogin) existingLogin.remove();
 
   navLinks.querySelectorAll('a, button').forEach((anchor) => {

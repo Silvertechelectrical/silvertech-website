@@ -6,7 +6,9 @@ import {
   onAuthStateChanged,
   deleteUser,
   reauthenticateWithCredential,
-  EmailAuthProvider
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -18,6 +20,7 @@ const registerBtn = document.getElementById('registerBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 const showPasswordToggle = document.getElementById('show-password-toggle');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
 
 function setStatus(message, isError = false) {
   if (statusMessage) {
@@ -50,6 +53,24 @@ async function handleRegister() {
   }
 }
 
+async function handleGoogleLogin() {
+  if (!auth) {
+    setStatus('Firebase is not configured yet. Please load the site config first.', true);
+    return;
+  }
+
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    await signInWithPopup(auth, provider);
+    const redirectTarget = sessionStorage.getItem('redirectAfterLogin') || '../pages/dashboard.html';
+    window.location.href = redirectTarget;
+  } catch (error) {
+    setStatus(error.message || 'Google sign-in failed.', true);
+  }
+}
+
 if (showPasswordToggle && passInput) {
   showPasswordToggle.addEventListener('change', () => {
     passInput.type = showPasswordToggle.checked ? 'text' : 'password';
@@ -58,6 +79,9 @@ if (showPasswordToggle && passInput) {
 
 if (loginBtn) loginBtn.addEventListener('click', handleLogin);
 if (registerBtn) registerBtn.addEventListener('click', handleRegister);
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener('click', handleGoogleLogin);
+}
 if (logoutBtn) logoutBtn.addEventListener('click', async () => {
   await signOut(auth);
   window.location.href = '../index.html';

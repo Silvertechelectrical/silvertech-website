@@ -18,7 +18,7 @@ const adminUnauthenticated = document.getElementById('admin-unauthenticated');
 const adminUnauthorized = document.getElementById('admin-unauthorized');
 const adminShell = document.getElementById('admin-shell');
 const adminWelcome = document.getElementById('admin-welcome');
-const logoutBtn = document.getElementById('logoutBtn');
+const headerLogoutBtn = document.getElementById('headerLogoutBtn');
 const serviceForm = document.getElementById('admin-service-form');
 const serviceStatus = document.getElementById('admin-service-status');
 const servicesList = document.getElementById('admin-services-list');
@@ -67,15 +67,29 @@ async function loadAdminMetrics() {
   }
 }
 
+function dedupeServices(items) {
+  const seen = new Set();
+  return items.filter((service) => {
+    const key = service.id || `${service.name || ''}-${service.category || ''}-${service.price || ''}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 function renderServiceCards(items) {
   if (!servicesList) return;
 
-  if (!items.length) {
+  const uniqueServices = dedupeServices(items);
+
+  if (!uniqueServices.length) {
     servicesList.innerHTML = '<p class="small">No services found. Add one from the form above.</p>';
     return;
   }
 
-  servicesList.innerHTML = items
+  servicesList.innerHTML = uniqueServices
     .map((service) => `
       <article class="service-card">
         <div class="catalog-card-actions">
@@ -110,7 +124,7 @@ function renderServiceCards(items) {
   servicesList.querySelectorAll('button[data-edit-id]').forEach((button) => {
     button.addEventListener('click', async () => {
       const serviceId = button.dataset.editId;
-      const service = items.find((item) => item.id === serviceId);
+      const service = uniqueServices.find((item) => item.id === serviceId);
       if (!service) return;
       populateServiceForm(service);
       serviceForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -153,31 +167,36 @@ async function isAdmin(user) {
   }
 }
 
+async function handleSignOut() {
+  await signOut(auth);
+  window.location.href = '../index.html';
+}
+
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
 
   if (!user) {
     showSection(adminUnauthenticated);
+    if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
     return;
   }
 
   const admin = await isAdmin(user);
   if (!admin) {
     showSection(adminUnauthorized);
+    if (headerLogoutBtn) headerLogoutBtn.classList.add('hidden');
     return;
   }
 
   adminWelcome.textContent = `Welcome, ${user.email}`;
+  if (headerLogoutBtn) headerLogoutBtn.classList.remove('hidden');
   showSection(adminShell);
   await loadAdminServices();
   await loadAdminMetrics();
 });
 
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = '../index.html';
-  });
+if (headerLogoutBtn) {
+  headerLogoutBtn.addEventListener('click', handleSignOut);
 }
 
 if (serviceForm) {

@@ -26,6 +26,16 @@ const fallbackServices = [
 
 let allServices = [];
 
+function dedupeItems(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = `${item?.id || ''}:${item?.name || ''}:${item?.category || ''}`;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function saveHistory(name, type) {
   const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
   history.unshift({ name, type, at: new Date().toLocaleString() });
@@ -99,7 +109,7 @@ function renderServices(items) {
     return;
   }
 
-  const uniqueItems = Array.from(new Map(items.map((service) => [service.id || service.name, service])).values());
+  const uniqueItems = dedupeItems(items);
 
   uniqueItems.forEach((service) => {
     const card = document.createElement('article');
@@ -132,13 +142,14 @@ function renderServices(items) {
         return;
       }
 
+      const select = document.getElementById('request-service-name');
+      if (select) {
+        select.value = service.name;
+      }
+      document.getElementById('request-phone')?.focus();
       const phone = prompt('Enter your phone number to submit this service request:');
       if (phone) {
         await submitServiceRequest(service.name, phone.trim());
-        const select = document.getElementById('request-service-name');
-        if (select) {
-          select.value = service.name;
-        }
       }
     });
     card.querySelectorAll('.star-btn').forEach((btn) => {
@@ -201,7 +212,8 @@ function populateRequestOptions(items) {
   const select = document.getElementById('request-service-name');
   if (!select) return;
 
-  select.innerHTML = '<option value="">Select a service</option>' + items.map((service) => `
+  const uniqueItems = dedupeItems(items);
+  select.innerHTML = '<option value="">Select a service</option>' + uniqueItems.map((service) => `
     <option value="${service.name}">${service.name} (${service.category})</option>
   `).join('');
 }

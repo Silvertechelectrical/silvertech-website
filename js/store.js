@@ -136,6 +136,13 @@ async function updateDeveloperAccess(user) {
     registerButton.classList.toggle('hidden', Boolean(user));
   }
 
+  const headingCopy = document.getElementById('store-status-copy');
+  if (headingCopy) {
+    headingCopy.textContent = user
+      ? 'Signed in as a creator-ready account. Review your status and continue to upload once approved.'
+      : 'Register with your email, pay a one-time fee, and get approved to upload apps or digital assets to the public store.';
+  }
+
   if (!user) {
     if (statusBanner) {
       statusBanner.classList.add('hidden');

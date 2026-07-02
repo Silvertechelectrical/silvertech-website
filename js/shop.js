@@ -59,6 +59,16 @@ const fallbackItems = [
 let allItems = [];
 let currentUser = null;
 
+function dedupeItems(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = `${item?.id || ''}:${item?.name || ''}:${item?.category || ''}`;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function saveHistory(name, type) {
   const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
   history.unshift({ name, type, at: new Date().toLocaleString() });
@@ -102,7 +112,7 @@ function renderShopItems(items) {
     return;
   }
 
-  const uniqueItems = Array.from(new Map(items.map((item) => [item.id || item.name, item])).values());
+  const uniqueItems = dedupeItems(items);
 
   uniqueItems.forEach((item) => {
     const card = document.createElement('article');
@@ -117,11 +127,11 @@ function renderShopItems(items) {
         <h3>${item.name}</h3>
         ${item.featured ? '<span class="pill">Featured</span>' : ''}
       </div>
-      <p class="meta">${item.category}</p>
-      <p>${item.description || 'Premium resource.'}</p>
       <div class="meta-badges">
-        <span class="meta-badge">Format: ${item.downloadFormat || 'Digital'}</span>
+        <span class="meta-badge">${item.category}</span>
+        <span class="meta-badge format-badge">${item.downloadFormat || 'Digital'}</span>
       </div>
+      <p>${item.description || 'Premium resource.'}</p>
       <div class="service-price">${item.price} KSH</div>
       <div class="stars" aria-label="Rating ${displayRating}">
         ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}" aria-label="Rate ${value} stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.75l2.56 5.2 5.74.83-4.15 4.04 1.0 5.68L12 15.98 6.85 18.5l1.0-5.68L3.7 8.78l5.74-.83L12 2.75Z"/></svg></button>`).join('')}
@@ -148,6 +158,7 @@ function renderShopItems(items) {
       if (phoneInput && currentUser?.phoneNumber) {
         phoneInput.value = currentUser.phoneNumber;
       }
+      emailInput?.focus();
     });
 
     card.querySelectorAll('.star-btn').forEach((btn) => {
@@ -208,7 +219,8 @@ function populatePurchaseOptions(items) {
   const select = document.getElementById('purchase-item-name');
   if (!select) return;
 
-  select.innerHTML = '<option value="">Select an item</option>' + items.map((item) => `
+  const uniqueItems = dedupeItems(items);
+  select.innerHTML = '<option value="">Select an item</option>' + uniqueItems.map((item) => `
     <option value="${item.name}">${item.name} (${item.price} KSH)</option>
   `).join('');
 }

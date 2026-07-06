@@ -91,15 +91,22 @@
 
             <section class="panel">
                 <h2>Your Service Catalog</h2>
-                                <div class="catalog-controls">
-                                    <input id="service-search" class="search-bar" type="search" placeholder="Search services or descriptions...">
-                                    <select id="service-filter-category">
-                                        <option value="">All categories</option>
-                                        <option value="Electrical">Electrical</option>
-                                        <option value="Telecom">Telecom</option>
-                                    </select>
-                                </div>
-                                <div id="admin-services-list" class="services-grid"></div>
+                <div class="catalog-controls">
+                    <input id="service-search" class="search-bar" type="search" placeholder="Search services or descriptions...">
+                    <select id="service-filter-category">
+                        <option value="">All categories</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Telecom">Telecom</option>
+                    </select>
+                </div>
+                <div id="admin-services-list" class="services-grid"></div>
+                <div id="load-more-container" class="panel-actions">
+                    <button id="load-more-btn" class="btn btn-outline">Load more</button>
+                </div>
+                <section id="recently-deleted-shell" class="panel hidden">
+                    <h3>Recently deleted</h3>
+                    <div id="recently-deleted-list" class="services-grid"></div>
+                </section>
             </section>
         </section>
     </main>

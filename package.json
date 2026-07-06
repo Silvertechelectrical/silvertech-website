@@ -6,7 +6,8 @@
   "scripts": {
     "seed": "node seed.js",
     "set-admin": "node set-admin.js",
-    "set-developer": "node set-developer.js"
+    "set-developer": "node set-developer.js",
+    "dedupe-services": "node scripts/dedupe_services.js"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0"

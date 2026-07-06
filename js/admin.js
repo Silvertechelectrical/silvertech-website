@@ -8,9 +8,10 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  deleteDoc,
   updateDoc,
-  doc
+  doc,
+  limit,
+  startAfter
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
 const adminLoading = document.getElementById('admin-loading');
@@ -24,11 +25,17 @@ const serviceStatus = document.getElementById('admin-service-status');
 const servicesList = document.getElementById('admin-services-list');
 const serviceSearch = document.getElementById('service-search');
 const serviceFilterCategory = document.getElementById('service-filter-category');
+const loadMoreBtn = document.getElementById('load-more-btn');
+const recentlyDeletedShell = document.getElementById('recently-deleted-shell');
+const recentlyDeletedList = document.getElementById('recently-deleted-list');
 const adminMetrics = document.getElementById('admin-metrics');
 
 let currentUser = null;
 let editingServiceId = null;
 let servicesCache = [];
+const PAGE_SIZE = 10;
+let lastVisible = null;
+let isFetching = false;
 
 function showSection(section) {
   [adminLoading, adminUnauthenticated, adminUnauthorized, adminShell].forEach((el) => {
@@ -115,14 +122,29 @@ function renderServiceCards(items) {
       const serviceId = button.dataset.id;
       if (!serviceId) return;
 
-      // Ask for confirmation to avoid accidental deletes
-      const confirmed = confirm('Are you sure you want to delete this service? This action cannot be undone.');
+      const confirmed = confirm('Are you sure you want to delete this service? This action can be undone from the admin panel.');
       if (!confirmed) return;
 
       try {
-        await deleteDoc(doc(db, 'services', serviceId));
-        await loadAdminServices();
-        serviceStatus.textContent = 'Service deleted successfully.';
+        await updateDoc(doc(db, 'services', serviceId), {
+          deleted: true,
+          deletedAt: serverTimestamp(),
+          deletedBy: currentUser ? currentUser.uid : null
+        });
+        serviceStatus.innerHTML = `Service deleted. <button id="undo-delete" class="btn btn-outline small">Undo</button>`;
+        const undoButton = document.getElementById('undo-delete');
+        if (undoButton) {
+          undoButton.addEventListener('click', async () => {
+            await updateDoc(doc(db, 'services', serviceId), {
+              deleted: false,
+              deletedAt: null,
+              deletedBy: null
+            });
+            serviceStatus.textContent = 'Delete undone.';
+            await loadAdminServices(false);
+          });
+        }
+        await loadAdminServices(false);
       } catch (error) {
         serviceStatus.textContent = error.message;
       }
@@ -141,16 +163,36 @@ function renderServiceCards(items) {
   });
 }
 
-async function loadAdminServices() {
-  if (!servicesList) return;
+async function loadAdminServices(append = false) {
+  if (!servicesList || isFetching) return;
+  isFetching = true;
 
   try {
-    const snapshot = await getDocs(query(collection(db, 'services'), orderBy('createdAt', 'desc')));
+    let servicesQuery = query(collection(db, 'services'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+    if (append && lastVisible) {
+      servicesQuery = query(collection(db, 'services'), orderBy('createdAt', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+    }
+
+    const snapshot = await getDocs(servicesQuery);
+    if (!snapshot.empty) {
+      lastVisible = snapshot.docs[snapshot.docs.length - 1];
+    } else {
+      lastVisible = null;
+    }
+
     const services = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    servicesCache = services;
+    servicesCache = append ? servicesCache.concat(services) : services;
     applyServiceFilters();
+    renderDeletedServices(servicesCache);
+    if (lastVisible && loadMoreBtn) {
+      loadMoreBtn.classList.remove('hidden');
+    } else if (loadMoreBtn) {
+      loadMoreBtn.classList.add('hidden');
+    }
   } catch (error) {
     servicesList.innerHTML = `<p class="small">Unable to load services: ${error.message}</p>`;
+  } finally {
+    isFetching = false;
   }
 }
 
@@ -158,6 +200,8 @@ function applyServiceFilters() {
   let items = servicesCache.slice();
   const q = serviceSearch && serviceSearch.value ? serviceSearch.value.trim().toLowerCase() : '';
   const cat = serviceFilterCategory && serviceFilterCategory.value ? serviceFilterCategory.value : '';
+
+  items = items.filter((service) => !service.deleted);
 
   if (cat) {
     items = items.filter((s) => (s.category || '').toLowerCase() === cat.toLowerCase());
@@ -264,6 +308,7 @@ if (serviceForm) {
           description,
           featured,
           rating: 4.5,
+          deleted: false,
           createdAt: serverTimestamp()
         });
         serviceStatus.textContent = 'Service saved successfully.';
@@ -275,7 +320,7 @@ if (serviceForm) {
       if (submitButton) {
         submitButton.textContent = 'Save Service';
       }
-      await loadAdminServices();
+      await loadAdminServices(false);
       await loadAdminMetrics();
     } catch (error) {
       serviceStatus.textContent = error.message;
@@ -289,4 +334,7 @@ if (serviceSearch) {
 }
 if (serviceFilterCategory) {
   serviceFilterCategory.addEventListener('change', () => applyServiceFilters());
+}
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', () => loadAdminServices(true));
 }

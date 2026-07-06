@@ -2,7 +2,7 @@ import { auth, db } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { isAdminUser, isApprovedDeveloper } from './role-utils.js';
-import { uploadToCloudinary } from './cloudinary-utils.js';
+import { uploadToCloudinary, FOLDERS } from './cloudinary-utils.js';
 
 let currentUser = null;
 
@@ -43,7 +43,7 @@ async function submitShopItem(formData) {
 
   try {
     statusEl.textContent = 'Uploading file...';
-    const fileUrl = await uploadToCloudinary(file, 'marketing');
+    const fileUrl = await uploadToCloudinary(file, FOLDERS.MARKETING);
 
     statusEl.textContent = 'Saving item details...';
     const itemPayload = {

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Browse | Silvertech</title>
+  <meta name="description" content="Browse approved Silvertech apps and digital assets from the store with secure Firebase-backed browsing.">
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="icon" type="image/x-icon" href="../../assets/img/silvertech_logo.ico">
+  <link rel="apple-touch-icon" href="../../assets/img/silvertech_logo.ico">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=20260702">
+  </head>
+<body>
+  <nav class="top-nav">
+    <a class="brand" href="../../index.html">
+      <span class="brand-icon icon icon-home"></span>
+      <span>Silvertech</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link-pill" href="../services.html">Services</a>
+      <a class="nav-link-pill" href="../shop.html">Shop</a>
+      <a class="nav-link-pill" href="./index.html">Store</a>
+      <a class="btn btn-outline" href="../login.html">Login</a>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <section class="page-hero">
+      <h1>Browse Store Apps</h1>
+      <p>View applications and assets uploaded by approved developers and the Silvertech owner.</p>
+      <input id="store-search" class="search-bar" type="text" placeholder="Search apps or resources...">
+    </section>
+
+    <section id="store-items" class="services-grid"></section>
+  </main>
+
+  <script src="../../js/load-firebase-config.js"></script>
+  <script src="../../js/register-sw.js"></script>
+  <script type="module" src="../../js/firebase-init.js"></script>
+  <script type="module" src="../../js/auth-nav.js"></script>
+  <script type="module" src="../../js/store-browse.js"></script>
+</body>
+</html>

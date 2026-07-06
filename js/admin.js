@@ -29,6 +29,8 @@ const loadMoreBtn = document.getElementById('load-more-btn');
 const recentlyDeletedShell = document.getElementById('recently-deleted-shell');
 const recentlyDeletedList = document.getElementById('recently-deleted-list');
 const adminMetrics = document.getElementById('admin-metrics');
+const roleAssignmentForm = document.getElementById('role-assignment-form');
+const roleAssignmentStatus = document.getElementById('role-assignment-status');
 
 let currentUser = null;
 let editingServiceId = null;
@@ -217,6 +219,45 @@ function applyServiceFilters() {
   renderServiceCards(items);
 }
 
+async function updateUserRole(email, role) {
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  if (!normalizedEmail || !role) {
+    if (roleAssignmentStatus) {
+      roleAssignmentStatus.textContent = 'Please provide an email and choose a role.';
+    }
+    return false;
+  }
+
+  try {
+    const queryRef = query(collection(db, 'users'), where('email', '==', normalizedEmail));
+    const snapshot = await getDocs(queryRef);
+
+    if (snapshot.empty) {
+      if (roleAssignmentStatus) {
+        roleAssignmentStatus.textContent = `No user found for ${normalizedEmail}.`;
+      }
+      return false;
+    }
+
+    const userDoc = snapshot.docs[0];
+    await updateDoc(doc(db, 'users', userDoc.id), {
+      role,
+      updatedAt: serverTimestamp()
+    });
+
+    if (roleAssignmentStatus) {
+      roleAssignmentStatus.textContent = `Updated ${normalizedEmail} to ${role}.`;
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to update user role:', error);
+    if (roleAssignmentStatus) {
+      roleAssignmentStatus.textContent = 'Unable to update role right now.';
+    }
+    return false;
+  }
+}
+
 async function isAdmin(user) {
   if (!user) return false;
   console.log('Admin check user:', { uid: user.uid, email: user.email });
@@ -269,6 +310,15 @@ onAuthStateChanged(auth, async (user) => {
 
 if (headerLogoutBtn) {
   headerLogoutBtn.addEventListener('click', handleSignOut);
+}
+
+if (roleAssignmentForm) {
+  roleAssignmentForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = document.getElementById('role-assignment-email').value;
+    const role = document.getElementById('role-assignment-role').value;
+    await updateUserRole(email, role);
+  });
 }
 
 if (serviceForm) {

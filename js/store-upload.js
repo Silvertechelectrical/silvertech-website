@@ -2,7 +2,7 @@ import { auth, db } from './firebase-init.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { isAdminUser, isDeveloperUser } from './role-utils.js';
-import { uploadToCloudinary } from './cloudinary-utils.js';
+import { uploadToCloudinary, FOLDERS } from './cloudinary-utils.js';
 
 const uploadShell = document.getElementById('upload-shell');
 const uploadForm = document.getElementById('store-upload-form');
@@ -63,8 +63,8 @@ async function submitListing(event) {
 
   try {
     uploadStatus.textContent = 'Uploading listing...';
-    const imageUpload = await uploadToCloudinary(imageFile, 'marketing');
-    const assetUpload = await uploadToCloudinary(assetFile, 'service-documentation');
+    const imageUpload = await uploadToCloudinary(imageFile, FOLDERS.MARKETING);
+    const assetUpload = await uploadToCloudinary(assetFile, FOLDERS.SERVICE_DOCUMENTATION);
 
     const listingPayload = {
       name,

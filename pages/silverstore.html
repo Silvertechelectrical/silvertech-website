@@ -1,132 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SilverStore | Silvertech</title>
-    <meta name="description" content="Register as a Silvertech developer, upload apps, and browse digital assets with Firebase-secured workflows.">
-    <meta property="og:title" content="SilverStore | Silvertech">
-    <meta property="og:description" content="Register as a Silvertech developer, upload apps, and browse digital assets with secure workflows.">
-    <meta property="og:image" content="../assets/img/silvertech_logo.ico">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <link rel="manifest" href="../manifest.json">
-    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
-    <link rel="apple-touch-icon" href="../assets/img/silvertech_logo.ico">
-    <link rel="preconnect" href="https://www.gstatic.com">
-    <link rel="preconnect" href="https://www.googleapis.com">
-    <link rel="stylesheet" href="../assets/css/style.css?v=20260702">
-</head>
-<body>
-    <nav class="top-nav">
-        <a class="brand" href="../index.html">
-            <span class="brand-icon icon icon-home"></span>
-            <span>Silvertech</span>
-        </a>
-        <div class="nav-links">
-            <a class="nav-link-pill" href="services.html">Services</a>
-            <a class="nav-link-pill" href="shop.html">Shop</a>
-            <a class="nav-link-pill" href="silverstore.html">Store</a>
-            <a class="btn btn-primary nav-login-btn" href="login.html">Login</a>
-        </div>
-    </nav>
-
-    <main class="page-shell">
-        <section class="page-hero">
-            <div class="hero-actions">
-                <a class="btn btn-secondary hidden" id="store-upload-action" href="#developer-upload-panel">Upload App</a>
-                <a class="btn btn-secondary hidden" id="store-verify-action" href="#developer-approval-panel">Verify Developers</a>
-                <a class="btn btn-primary hidden" id="register-developer-button" href="#developer-registration">Register as Developer (300 KSH)</a>
-                <a class="btn btn-secondary btn-icon" href="store-browse.html"><span class="icon icon-mobile"></span> Browse Apps</a>
-            </div>
-            <h1>SilverStore for Developers</h1>
-            <p id="store-status-copy">Register with your email, pay a one-time fee, and get approved to upload apps or digital assets to the public store.</p>
-            <div id="developer-status-banner" class="status-banner hidden" role="status"></div>
-        </section>
-
-        <section class="feature-grid">
-            <article class="feature-card">
-                <h2>Developer Registration</h2>
-                <p>Pay a one-time fee of <strong>300 KSH</strong> and contact the owner to become an approved developer.</p>
-                <p class="small">Once approved, you can upload apps, templates, and digital assets to the public store.</p>
-            </article>
-            <article class="feature-card">
-                <h2>Owner / Admin Upload</h2>
-                <p>As the owner, sign in with your admin email to upload apps you have built and publish them directly.</p>
-                <p class="small">Admin uploads are auto-approved, while developer uploads require approval.</p>
-            </article>
-            <article class="feature-card">
-                <h2>Public App Gallery</h2>
-                <p>Visitors can browse approved apps anytime without signing in, just like a Play Store experience.</p>
-            </article>
-        </section>
-
-        <section id="developer-registration" class="auth-card">
-            <h2>Developer Registration</h2>
-            <p class="small">Send the 300 KSH fee manually to <strong>Mpesa 0757069075</strong>. Then enter the Mpesa payment reference below.</p>
-            <p class="small">Use the same email here as the one you will sign in with. Approval is granted by email, so matching email is required.</p>
-            <div class="stepper">
-                <div class="step"><strong>Step 1:</strong> Send 300 KSH via M-Pesa to 0757069075.</div>
-                <div class="step"><strong>Step 2:</strong> Enter your phone number and transaction reference below.</div>
-                <div class="step"><strong>Step 3:</strong> Submit and await manual activation notification.</div>
-            </div>
-            <form id="registration-form">
-                <label class="small" for="reg-name">Full Name *</label>
-                <input id="reg-name" type="text" placeholder="Your full name" required>
-
-                <label class="small" for="reg-email">Email *</label>
-                <input id="reg-email" type="email" placeholder="you@example.com" required>
-
-                <label class="small" for="reg-phone">Phone Number *</label>
-                <input id="reg-phone" type="tel" placeholder="Your phone number" required>
-
-                <label class="small" for="reg-reference">Payment Reference *</label>
-                <input id="reg-reference" type="text" placeholder="Transaction code or Mpesa reference" required>
-
-                <button type="submit">Submit Registration</button>
-            </form>
-            <p id="registration-status" class="status-message"></p>
-        </section>
-
-        <section id="developer-approval-panel" class="admin-panel hidden">
-            <h2>Email-based Developer Approval</h2>
-            <p class="small">Approve developers by confirming their Mpesa payment reference. Once approved, the registered email is authorized to upload assets after signing in.</p>
-            <div id="developer-applications-list" class="services-grid"></div>
-        </section>
-
-        <section id="developer-upload-panel" class="auth-card hidden">
-            <h2>Upload a Store Asset</h2>
-            <p class="small">Approved developers and admins can upload files to Cloudinary and submit them for the public store.</p>
-            <form id="developer-upload-form">
-                <label class="small" for="developer-name">Asset Name *</label>
-                <input id="developer-name" placeholder="Asset name" required>
-
-                <label class="small" for="developer-category">Category *</label>
-                <input id="developer-category" placeholder="Apps, Tools, Templates" required>
-
-                <label class="small" for="developer-price">Price (KSH)</label>
-                <input id="developer-price" type="number" placeholder="3000" min="0" required>
-
-                <label class="small" for="developer-file">Asset File *</label>
-                <label class="dropzone" for="developer-file">
-                    <span>Drag &amp; drop asset file here or click to browse.</span>
-                    <input id="developer-file" type="file" required>
-                </label>
-
-                <label class="small" for="developer-description">Description *</label>
-                <textarea id="developer-description" placeholder="Short description" rows="4"></textarea>
-
-                <button type="submit">Upload to Cloudinary</button>
-            </form>
-            <p id="developer-upload-status" class="status-message"></p>
-        </section>
-    </main>
-
-    <script src="../js/load-firebase-config.js?v=20260702"></script>
-    <script src="../js/register-sw.js?v=20260702"></script>
-    <script type="module" src="../js/firebase-init.js?v=20260702"></script>
-    <script src="../cloudinary-config.js?v=20260702"></script>
-    <script type="module" src="../js/auth-nav.js?v=20260702"></script>
-    <script type="module" src="../js/store.js?v=20260702"></script>
-</body>
+    <meta http-equiv="refresh" content="0; url=./store/index.html">
+    <link rel="canonical" href="./store/index.html">
+    <title>Redirecting to Store | Silvertech</title>
+  </head>
+  <body>
+    <p>Redirecting to the new store hub…</p>
+    <script>
+      window.location.replace('./store/index.html');
+    </script>
+  </body>
 </html>

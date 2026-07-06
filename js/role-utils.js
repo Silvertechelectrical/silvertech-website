@@ -18,6 +18,7 @@ export const ROLES = {
   developer: 'developer',
   service_provider: 'service_provider',
   sales: 'sales',
+  sales_engineer: 'sales_engineer',
   engineer: 'engineer',
   admin: 'admin'
 };
@@ -28,6 +29,7 @@ export const ROLE_CAPABILITIES = {
   [ROLES.developer]: ['upload_store_assets', 'browse'],
   [ROLES.service_provider]: ['manage_service_media', 'browse'],
   [ROLES.sales]: ['edit_product_variables', 'browse'],
+  [ROLES.sales_engineer]: ['edit_product_variables', 'browse'],
   [ROLES.engineer]: ['edit_product_variables', 'browse'],
   [ROLES.admin]: ['manage_users', 'manage_services', 'manage_store', 'browse']
 };
@@ -152,10 +154,10 @@ export async function isServiceProvider(user) {
 
 export async function isSalesEngineerAdmin(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.sales, ROLES.engineer, ROLES.admin]);
+  return hasAnyRole(user, [ROLES.sales, ROLES.sales_engineer, ROLES.engineer, ROLES.admin]);
 }
 
 export async function isWorkforceUser(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.service_provider, ROLES.sales, ROLES.engineer, ROLES.admin]);
+  return hasAnyRole(user, [ROLES.service_provider, ROLES.sales, ROLES.sales_engineer, ROLES.engineer, ROLES.admin]);
 }

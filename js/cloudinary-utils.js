@@ -3,7 +3,12 @@ export const cloudinaryConfig = window.CLOUDINARY_CONFIG || {
   uploadPreset: 'my_silvertechelectrical_preset'
 };
 
-export async function uploadToCloudinary(file, folder = 'service-documentation') {
+export const FOLDERS = {
+  MARKETING: 'marketing',
+  SERVICE_DOCUMENTATION: 'service-documentation'
+};
+
+export async function uploadToCloudinary(file, folder = FOLDERS.SERVICE_DOCUMENTATION) {
   if (!file) {
     throw new Error('No file provided for Cloudinary upload.');
   }

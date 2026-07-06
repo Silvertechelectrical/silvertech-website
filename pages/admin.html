@@ -36,6 +36,28 @@
             <div id="admin-metrics" class="status-banner hidden" role="status"></div>
         </section>
 
+        <section class="panel">
+            <h2>Assign Workforce Roles</h2>
+            <p class="small">Update a user's role by email so they can access the appropriate workforce tools.</p>
+            <form id="role-assignment-form" class="admin-form-shell">
+                <label class="small" for="role-assignment-email">User email *</label>
+                <input id="role-assignment-email" type="email" placeholder="user@example.com" required>
+
+                <label class="small" for="role-assignment-role">Role *</label>
+                <select id="role-assignment-role" required>
+                    <option value="">Select role</option>
+                    <option value="user">User</option>
+                    <option value="developer">Developer</option>
+                    <option value="service_provider">Service Provider</option>
+                    <option value="sales_engineer">Sales Engineer</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button type="submit">Update Role</button>
+                <p id="role-assignment-status" class="status-message"></p>
+            </form>
+        </section>
+
         <section id="admin-loading" class="auth-card">
             <h2>Checking access...</h2>
             <p class="small">Please wait while we verify your admin privileges.</p>

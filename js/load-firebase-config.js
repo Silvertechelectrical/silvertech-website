@@ -32,24 +32,49 @@
     }
   }
 
+  function getPathSegments() {
+    try {
+      const path = window.location.pathname.replace(/\/+$/, '');
+      return path ? path.split('/').filter(Boolean) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
   function buildCandidateUrls() {
     const repoBase = getRepoBase();
     const candidates = [];
     const origin = window.location.origin;
+<<<<<<< HEAD
     const scriptUrl = getCurrentScriptUrl();
 
     if (scriptUrl) {
       candidates.push(new URL('../firebase-config.js', scriptUrl).toString());
       candidates.push(new URL('./firebase-config.js', scriptUrl).toString());
     }
+=======
+    const segments = getPathSegments();
+    const repoName = segments[0] || 'silvertech-website';
+>>>>>>> gh-pages
 
     if (repoBase) {
       candidates.push(`${origin}${repoBase}/firebase-config.js`);
     }
 
+    if (segments.length) {
+      const currentPathBase = segments.slice(0, -1).join('/');
+      if (currentPathBase) {
+        candidates.push(`${origin}/${currentPathBase}/firebase-config.js`);
+      }
+    }
+
+    candidates.push(`${origin}/${repoName}/firebase-config.js`);
     candidates.push(`${origin}/firebase-config.js`);
+<<<<<<< HEAD
     candidates.push(`${origin}/silvertech-website/firebase-config.js`);
     // Try raw GitHub URLs for the repo under the current owner's account as a fallback.
+=======
+>>>>>>> gh-pages
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/gh-pages/firebase-config.js');
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/main/firebase-config.js');
 
@@ -78,11 +103,16 @@
     const candidateUrls = buildCandidateUrls();
     console.debug('loadFirebaseConfig: candidate URLs', candidateUrls);
     for (const url of candidateUrls) {
+<<<<<<< HEAD
       // try each URL in sequence until one succeeds
+=======
+>>>>>>> gh-pages
       // eslint-disable-next-line no-await-in-loop
       const ok = await loadConfigFromUrl(url);
       if (ok) return;
     }
+
+    console.warn('Firebase config was not loaded from any known URL. Authentication will remain unavailable until the config file is published.');
   }
 
   window.loadFirebaseConfig = loadConfig;

@@ -30,6 +30,23 @@ function setStatus(message, isError = false) {
   }
 }
 
+function getRelativePageUrl(targetPath) {
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  const segments = currentPath.split('/').filter(Boolean);
+  const pagesIndex = segments.indexOf('pages');
+
+  if (pagesIndex === -1) {
+    return `pages/${targetPath}`;
+  }
+
+  const afterPages = segments.slice(pagesIndex + 1);
+  const currentDir = afterPages.length && afterPages[afterPages.length - 1].includes('.')
+    ? afterPages.slice(0, -1)
+    : afterPages;
+  const prefix = currentDir.length ? currentDir.map(() => '..').join('/') + '/' : '';
+  return `${prefix}${targetPath}`;
+}
+
 async function handleLogin() {
   if (!emailInput || !passInput) return;
   try {
@@ -51,12 +68,12 @@ async function handleLogin() {
       const isAdmin = await isAdminUser(currentUser);
       const isDeveloper = await isDeveloperUser(currentUser);
       if (isAdmin || isDeveloper) {
-        window.location.href = '/pages/developer-dashboard.html';
+        window.location.href = getRelativePageUrl('developer-dashboard.html');
         return;
       }
     }
 
-    window.location.href = '/pages/dashboard.html';
+    window.location.href = getRelativePageUrl('dashboard.html');
   } catch (error) {
     setStatus(error.message, true);
   }
@@ -76,11 +93,11 @@ async function handleRegister() {
       if (currentUser) {
         getUserRole(currentUser).then((role) => {
           sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
-          window.location.href = '/pages/dashboard.html';
-        }).catch(() => window.location.href = '/pages/dashboard.html');
+          window.location.href = getRelativePageUrl('dashboard.html');
+        }).catch(() => window.location.href = getRelativePageUrl('dashboard.html'));
         return;
       }
-      window.location.href = '/pages/dashboard.html';
+      window.location.href = getRelativePageUrl('dashboard.html');
     }, 700);
   } catch (error) {
     setStatus(error.message, true);
@@ -115,12 +132,12 @@ async function handleGoogleLogin() {
       const isAdmin = await isAdminUser(currentUser);
       const isDeveloper = await isDeveloperUser(currentUser);
       if (isAdmin || isDeveloper) {
-        window.location.href = '/pages/developer-dashboard.html';
+        window.location.href = getRelativePageUrl('developer-dashboard.html');
         return;
       }
     }
 
-    window.location.href = '/pages/dashboard.html';
+    window.location.href = getRelativePageUrl('dashboard.html');
   } catch (error) {
     setStatus(error.message || 'Google sign-in failed.', true);
   }

@@ -18,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="preconnect" href="https://www.googleapis.com">
-    <link rel="stylesheet" href="./assets/css/style.css?v=20260702">
+    <link rel="stylesheet" href="./assets/css/style.css?v=20260627">
 </head>
 <body>
     <nav class="top-nav">
@@ -29,7 +29,7 @@
         <div class="nav-links">
             <a class="nav-link-pill" href="pages/services.html">Services</a>
             <a class="nav-link-pill" href="pages/shop.html">Shop</a>
-            <a class="nav-link-pill" href="pages/silverstore.html">Store</a>
+            <a class="nav-link-pill" href="pages/store.html">Store</a>
             <a class="btn btn-primary nav-login-btn" href="pages/login.html">Login</a>
         </div>
     </nav>
@@ -43,7 +43,7 @@
             <div class="hero-actions">
                 <a class="btn btn-primary btn-large" href="pages/services.html">Request Service</a>
                 <a class="btn btn-secondary btn-icon" href="pages/shop.html"><span class="icon icon-cart"></span> Shop</a>
-                <a class="btn btn-secondary btn-icon" href="pages/silverstore.html"><span class="icon icon-home"></span> Developer Store</a>
+                <a class="btn btn-secondary btn-icon" href="pages/store.html"><span class="icon icon-home"></span> Developer Store</a>
                 <a class="btn btn-secondary btn-icon" href="pages/store-browse.html"><span class="icon icon-mobile"></span> Apps</a>
             </div>
         </div>
@@ -88,80 +88,39 @@
         </section>
     </main>
 
-    <script src="./js/load-firebase-config.js?v=20260702"></script>
-    <script src="./js/register-sw.js?v=20260702"></script>
-    <script type="module" src="./js/firebase-init.js?v=20260702"></script>
-    <script type="module" src="./js/auth-nav.js?v=20260702"></script>
-        <script>
-            // Try loading lucide from multiple CDNs; fall back to inline icons if none load.
-            (function loadLucide() {
-                                // prefer a local vendored copy when present, then try known CDNs
-                                const repoBase = (function() {
-                                    try {
-                                        const s = document.currentScript && document.currentScript.src;
-                                        if (!s) return '';
-                                        const p = new URL(s).pathname;
-                                        const idx = p.indexOf('/js/');
-                                        return idx !== -1 ? p.substring(0, idx) : '';
-                                    } catch (e) {
-                                        return '';
-                                    }
-                                })();
-                const baseAssetUrl = repoBase ? `${location.origin}${repoBase}` : location.origin;
-                const candidates = [
-                    `${baseAssetUrl}/assets/js/lucide.min.js`,
-                                        `${location.origin}/assets/js/lucide.min.js`,
-                                        'https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js',
-                                        'https://unpkg.com/lucide@0.484.0/dist/lucide.min.js'
-                                ];
-
-                function tryLoad(idx) {
-                    if (idx >= candidates.length) {
-                        console.warn('Lucide not available from CDN; using fallback icons.');
-                        applyFallbackIcons();
-                        return;
-                    }
-
-                    const src = candidates[idx];
-                    const s = document.createElement('script');
-                    s.src = src;
-                    s.crossOrigin = 'anonymous';
-                    s.onload = () => {
-                        try {
-                            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                                window.lucide.createIcons();
-                            } else {
-                                applyFallbackIcons();
-                            }
-                        } catch (e) {
-                            console.warn('Lucide loaded but initialization failed:', e);
-                            applyFallbackIcons();
-                        }
-                    };
-                    s.onerror = () => {
-                        s.remove();
-                        tryLoad(idx + 1);
-                    };
-                    document.head.appendChild(s);
+    <script src="./js/load-firebase-config.js?v=20260627"></script>
+    <script src="./js/register-sw.js"></script>
+    <script type="module" src="./js/firebase-init.js?v=20260627"></script>
+    <script type="module" src="./js/auth-nav.js?v=20260627"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js" crossorigin="anonymous"></script>
+    <script>
+        window.addEventListener('load', function() {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                try {
+                    window.lucide.createIcons();
+                } catch (e) {
+                    console.warn('Lucide icon initialization failed:', e);
+                    applyFallbackIcons();
                 }
-
-                window.addEventListener('load', () => tryLoad(0));
-            })();
-
-            function applyFallbackIcons() {
-                document.querySelectorAll('[data-lucide]').forEach((icon) => {
-                    const name = icon.getAttribute('data-lucide');
-                    const fallbackIcons = {
-                        shield: '🛡️',
-                        database: '🗄️',
-                        'shopping-bag': '🛍️',
-                        home: '🏠',
-                        cart: '🛒',
-                        mobile: '📱'
-                    };
-                    icon.textContent = fallbackIcons[name] || '•';
-                });
+            } else {
+                applyFallbackIcons();
             }
-        </script>
+        });
+        
+        function applyFallbackIcons() {
+            document.querySelectorAll('[data-lucide]').forEach((icon) => {
+                const name = icon.getAttribute('data-lucide');
+                const fallbackIcons = {
+                    shield: '🛡️',
+                    database: '🗄️',
+                    'shopping-bag': '🛍️',
+                    home: '🏠',
+                    cart: '🛒',
+                    mobile: '📱'
+                };
+                icon.textContent = fallbackIcons[name] || '•';
+            });
+        }
+    </script>
 </body>
 </html>

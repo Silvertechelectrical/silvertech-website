@@ -122,12 +122,22 @@ async function updateNav(user) {
   if (user) {
     const isAdmin = await isAdminUser(user);
     navLinks.appendChild(createUserNav(user, isAdmin));
+
+    const dashboardLink = document.createElement('a');
+    dashboardLink.href = isAdmin ? 'admin.html' : 'developer-dashboard.html';
+    dashboardLink.className = 'nav-link-pill';
+    dashboardLink.textContent = 'Dashboard';
+    navLinks.appendChild(dashboardLink);
   } else {
     navLinks.appendChild(createLoginLink());
   }
 }
 
-onAuthStateChanged(auth, async (user) => {
-  updateHeroGreeting(user);
-  await updateNav(user);
-});
+if (auth) {
+  onAuthStateChanged(auth, async (user) => {
+    updateHeroGreeting(user);
+    await updateNav(user);
+  });
+} else {
+  console.warn('Firebase auth is not initialized. Navigation will remain in guest mode.');
+}

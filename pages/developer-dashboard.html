@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Silvertech</title>
-    <meta name="description" content="Check your Silvertech account, activity history, and sign out of Firebase-protected access.">
-    <meta property="og:title" content="Silvertech Dashboard">
-    <meta property="og:description" content="Check your Silvertech account, activity history, and sign out of Firebase-protected access.">
+    <title>Developer Dashboard | Silvertech</title>
+    <meta name="description" content="Silvertech developer dashboard for uploads, approvals, and workforce tools.">
+    <meta property="og:title" content="Silvertech Developer Dashboard">
+    <meta property="og:description" content="Access developer tools, upload portals, and approval workflows for Silvertech.">
     <meta property="og:image" content="../assets/img/silvertech_logo.ico">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
@@ -27,25 +27,31 @@
             <a class="nav-link-pill" href="services.html">Services</a>
             <a class="nav-link-pill" href="shop.html">Shop</a>
             <a class="nav-link-pill" href="store.html">Store</a>
-            <a class="btn btn-outline" href="login.html">Login</a>
+            <a class="btn btn-primary nav-login-btn" href="login.html">Login</a>
         </div>
     </nav>
 
     <main class="page-shell">
         <section class="page-hero">
-            <h1>My Account</h1>
-            <p id="auth-status">Guest access</p>
+            <h1>Developer Dashboard</h1>
+            <p>Access your developer tools, upload portal, and verification controls from one secure dashboard.</p>
+            <div id="developer-actions" class="hero-actions"></div>
+            <div id="developer-dashboard-banner" class="status-banner hidden" role="status"></div>
         </section>
 
-        <section class="panel">
-            <h2>Recent Activity</h2>
-            <div id="history-list" class="history-list"></div>
-        </section>
-
-        <section class="panel">
-            <h2>Subscription Status</h2>
-            <p>Active • Premium access enabled</p>
-            <button id="logoutBtn">Sign Out</button>
+        <section class="feature-grid">
+            <article class="feature-card">
+                <h2>Upload Listings</h2>
+                <p>Add products and services to the store through a dedicated publishing workflow.</p>
+            </article>
+            <article class="feature-card">
+                <h2>Browse Store</h2>
+                <p>See approved assets and service portfolios in the public store catalog.</p>
+            </article>
+            <article class="feature-card hidden" id="developer-admin-card">
+                <h2>Admin Controls</h2>
+                <p>Admins can approve developers, manage the workforce, and govern the store.</p>
+            </article>
         </section>
     </main>
 
@@ -53,15 +59,6 @@
     <script src="../js/register-sw.js"></script>
     <script type="module" src="../js/firebase-init.js"></script>
     <script type="module" src="../js/auth-nav.js"></script>
-    <script type="module" src="../js/auth.js"></script>
-    <script>
-        const historyList = document.getElementById('history-list');
-        const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
-        if (history.length) {
-            historyList.innerHTML = history.map((item) => `<div class="history-item"><strong>${item.name}</strong><br><span class="small">${item.type} • ${item.at}</span></div>`).join('');
-        } else {
-            historyList.innerHTML = '<p class="small">No activity yet. Request a service or open the store to begin.</p>';
-        }
-    </script>
+    <script type="module" src="../js/developer-dashboard.js"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { ensureUserProfile, isAdminUser, isDeveloperUser } from './role-utils.js';
 
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');
@@ -32,9 +33,28 @@ function setStatus(message, isError = false) {
 async function handleLogin() {
   if (!emailInput || !passInput) return;
   try {
-    await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
-    const redirectTarget = sessionStorage.getItem('redirectAfterLogin') || '../index.html';
-    window.location.href = redirectTarget;
+    const credential = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    if (credential.user) {
+      await ensureUserProfile(credential.user);
+    }
+
+    const redirectTarget = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectTarget) {
+      window.location.href = redirectTarget;
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const isAdmin = await isAdminUser(currentUser);
+      const isDeveloper = await isDeveloperUser(currentUser);
+      if (isAdmin || isDeveloper) {
+        window.location.href = '../pages/developer-dashboard.html';
+        return;
+      }
+    }
+
+    window.location.href = '../pages/dashboard.html';
   } catch (error) {
     setStatus(error.message, true);
   }
@@ -43,7 +63,10 @@ async function handleLogin() {
 async function handleRegister() {
   if (!emailInput || !passInput) return;
   try {
-    await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    const credential = await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    if (credential.user) {
+      await ensureUserProfile(credential.user);
+    }
     setStatus('Account created successfully. Redirecting to your dashboard.');
     setTimeout(() => {
       window.location.href = '../pages/dashboard.html';
@@ -63,9 +86,28 @@ async function handleGoogleLogin() {
     const provider = new GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
-    await signInWithPopup(auth, provider);
-    const redirectTarget = sessionStorage.getItem('redirectAfterLogin') || '../pages/dashboard.html';
-    window.location.href = redirectTarget;
+    const result = await signInWithPopup(auth, provider);
+    if (result.user) {
+      await ensureUserProfile(result.user);
+    }
+
+    const redirectTarget = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectTarget) {
+      window.location.href = redirectTarget;
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const isAdmin = await isAdminUser(currentUser);
+      const isDeveloper = await isDeveloperUser(currentUser);
+      if (isAdmin || isDeveloper) {
+        window.location.href = '../pages/developer-dashboard.html';
+        return;
+      }
+    }
+
+    window.location.href = '../pages/dashboard.html';
   } catch (error) {
     setStatus(error.message || 'Google sign-in failed.', true);
   }

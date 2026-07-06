@@ -1,20 +1,32 @@
 (function () {
-  function getRepoBase() {
+  function getCurrentScriptUrl() {
     try {
-      const scriptUrl = document.currentScript && document.currentScript.src;
-      if (scriptUrl) {
-        const pathname = new URL(scriptUrl).pathname;
-        const idx = pathname.indexOf('/js/');
-        if (idx !== -1) {
-          return pathname.substring(0, idx);
-        }
+      if (document.currentScript && document.currentScript.src) {
+        return new URL(document.currentScript.src, window.location.href);
       }
 
-      const locationPath = window.location.pathname;
-      if (locationPath.includes('/pages/')) {
-        return locationPath.replace(/\/pages\/.*$/, '');
+      const scripts = Array.from(document.getElementsByTagName('script'));
+      const loaderScript = scripts.find((script) => /load-firebase-config\.js/.test(script.src));
+      if (loaderScript && loaderScript.src) {
+        return new URL(loaderScript.src, window.location.href);
       }
-      return locationPath.replace(/\/[^/]*$/, '') || '';
+    } catch (error) {
+      console.debug('Unable to resolve current script URL:', error);
+    }
+
+    return null;
+  }
+
+  function getRepoBase() {
+    try {
+      const scriptUrl = getCurrentScriptUrl();
+      if (!scriptUrl) {
+        return '';
+      }
+
+      const pathname = scriptUrl.pathname;
+      const idx = pathname.indexOf('/js/');
+      return idx !== -1 ? pathname.substring(0, idx) : '';
     } catch (error) {
       return '';
     }
@@ -24,14 +36,20 @@
     const repoBase = getRepoBase();
     const candidates = [];
     const origin = window.location.origin;
+    const scriptUrl = getCurrentScriptUrl();
+
+    if (scriptUrl) {
+      candidates.push(new URL('../firebase-config.js', scriptUrl).toString());
+      candidates.push(new URL('./firebase-config.js', scriptUrl).toString());
+    }
 
     if (repoBase) {
       candidates.push(`${origin}${repoBase}/firebase-config.js`);
     }
 
     candidates.push(`${origin}/firebase-config.js`);
+    candidates.push(`${origin}/silvertech-website/firebase-config.js`);
     // Try raw GitHub URLs for the repo under the current owner's account as a fallback.
-    // Updated to use the current GitHub username 'Silvertechelectrical'.
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/gh-pages/firebase-config.js');
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/main/firebase-config.js');
 

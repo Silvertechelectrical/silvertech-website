@@ -1,21 +1,26 @@
 import { auth, db } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { collection, getDocs, addDoc, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { isAdminUser, isApprovedDeveloper } from './role-utils.js';
+import { isAdminUser } from './role-utils.js';
+import { uploadToCloudinary, FOLDERS } from './cloudinary-utils.js';
 
 const manageButton = document.getElementById('shop-manage-button');
+const shopAddForm = document.getElementById('shop-add-form');
+const shopAddToggle = document.getElementById('shop-add-toggle');
+const shopUploadForm = document.getElementById('shop-upload-form');
+const uploadStatus = document.getElementById('upload-status');
 
 async function updateShopManageButton(user) {
-  if (!manageButton) return;
-
-  manageButton.classList.add('hidden');
-  if (!user) return;
+  if (!user) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+    return;
+  }
 
   try {
-    const admin = await isAdminUser(user);
-    if (admin) {
-      manageButton.classList.remove('hidden');
-    }
+    const isAdmin = await isAdminUser(user);
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.classList.toggle('hidden', !isAdmin);
+    });
   } catch (error) {
     console.error('Error checking shop manager status:', error);
   }
@@ -25,6 +30,61 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
   updateShopManageButton(user);
 });
+
+if (shopAddToggle) {
+  shopAddToggle.addEventListener('click', () => {
+    if (shopAddForm) {
+      shopAddForm.classList.toggle('hidden');
+    }
+  });
+}
+
+if (shopUploadForm) {
+  shopUploadForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentUser) {
+      uploadStatus.textContent = 'You must be logged in to add items.';
+      return;
+    }
+
+    const name = document.getElementById('item-name').value.trim();
+    const category = document.getElementById('item-category').value.trim();
+    const price = document.getElementById('item-price').value.trim();
+    const description = document.getElementById('item-description').value.trim();
+    const file = document.getElementById('item-file').files[0];
+    const featured = document.getElementById('item-featured').checked;
+
+    if (!name || !category || !price || !description || !file) {
+      uploadStatus.textContent = 'Please fill in all required fields.';
+      return;
+    }
+
+    try {
+      uploadStatus.textContent = 'Uploading file...';
+      const fileUrl = await uploadToCloudinary(file, FOLDERS.MARKETING);
+
+      await addDoc(collection(db, 'shop'), {
+        name,
+        category,
+        price,
+        description,
+        fileUrl: fileUrl.secure_url,
+        featured,
+        published: false,
+        uploadedBy: currentUser.uid,
+        uploadedByEmail: currentUser.email,
+        createdAt: serverTimestamp(),
+        rating: 4.5
+      });
+
+      uploadStatus.textContent = 'Item added successfully! Awaiting admin approval.';
+      shopUploadForm.reset();
+      if (shopAddForm) shopAddForm.classList.add('hidden');
+    } catch (error) {
+      uploadStatus.textContent = `Error: ${error.message}`;
+    }
+  });
+}
 
 const fallbackItems = [
   {

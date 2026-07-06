@@ -44,18 +44,22 @@ function saveHistory(name, type) {
 
 let currentUser = null;
 const addServiceButton = document.getElementById('services-add-button');
+const servicesAddForm = document.getElementById('services-add-form');
+const servicesAddToggle = document.getElementById('services-add-toggle');
+const adminServiceForm = document.getElementById('admin-service-form');
+const adminServiceStatus = document.getElementById('admin-service-status');
 
 async function updateServiceAccess(user) {
-  if (!addServiceButton) return;
-
-  addServiceButton.classList.add('hidden');
-  if (!user) return;
+  if (!user) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+    return;
+  }
 
   try {
-    const admin = await isAdminUser(user);
-    if (admin) {
-      addServiceButton.classList.remove('hidden');
-    }
+    const isAdmin = await isAdminUser(user);
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.classList.toggle('hidden', !isAdmin);
+    });
   } catch (error) {
     console.error('Error checking service admin status:', error);
   }
@@ -65,6 +69,55 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
   updateServiceAccess(user);
 });
+
+if (servicesAddToggle) {
+  servicesAddToggle.addEventListener('click', () => {
+    if (servicesAddForm) {
+      servicesAddForm.classList.toggle('hidden');
+    }
+  });
+}
+
+if (adminServiceForm) {
+  adminServiceForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentUser) {
+      adminServiceStatus.textContent = 'You must be logged in to add services.';
+      return;
+    }
+
+    const name = document.getElementById('service-name').value.trim();
+    const category = document.getElementById('service-category').value.trim();
+    const price = document.getElementById('service-price').value.trim();
+    const delivery = document.getElementById('service-delivery').value.trim();
+    const description = document.getElementById('service-description').value.trim();
+    const featured = document.getElementById('service-featured').checked;
+
+    if (!name || !category || !price || !delivery) {
+      adminServiceStatus.textContent = 'Please fill in all required fields.';
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'services'), {
+        name,
+        category,
+        price,
+        delivery,
+        description,
+        featured,
+        rating: 4.5,
+        deleted: false,
+        createdAt: serverTimestamp()
+      });
+      adminServiceStatus.textContent = 'Service added successfully!';
+      adminServiceForm.reset();
+      if (servicesAddForm) servicesAddForm.classList.add('hidden');
+    } catch (error) {
+      adminServiceStatus.textContent = `Error: ${error.message}`;
+    }
+  });
+}
 
 async function submitServiceRequest(serviceName, customerPhoneNumber) {
   if (!currentUser) {

@@ -34,7 +34,7 @@
     <main class="page-shell">
         <section class="page-hero">
             <div class="hero-actions">
-                <a class="btn btn-secondary hidden" id="shop-manage-button" href="shop-management.html">Add Item</a>
+                <button class="btn btn-secondary hidden admin-only" id="shop-add-toggle">+ Add Item</button>
             </div>
             <h1>Silvertech Shop</h1>
             <p>Browse and purchase premium digital assets, templates, and field-ready resources.</p>
@@ -42,6 +42,29 @@
                 <span class="search-icon" aria-hidden="true">🔎</span>
                 <input id="shop-search" class="search-bar" type="text" placeholder="Search items...">
             </div>
+        </section>
+
+        <section id="shop-add-form" class="panel hidden admin-only">
+            <h2>Add a New Shop Item</h2>
+            <form id="shop-upload-form" class="admin-form-shell">
+                <input id="item-name" type="text" placeholder="Item name" required>
+                <label class="small" for="item-category">Category *</label>
+                <select id="item-category" required>
+                    <option value="">Select category</option>
+                    <option value="Templates">Templates</option>
+                    <option value="Tools">Tools</option>
+                    <option value="Resources">Resources</option>
+                </select>
+                <input id="item-price" type="number" placeholder="Price (KSH)" required>
+                <textarea id="item-description" placeholder="Item description" rows="4" required></textarea>
+                <label class="small" for="item-file">Upload File *</label>
+                <input id="item-file" type="file" required>
+                <label class="small">
+                    <input id="item-featured" type="checkbox"> Feature this item
+                </label>
+                <button type="submit">Upload Item</button>
+                <p id="upload-status" class="status-message"></p>
+            </form>
         </section>
 
         <section id="shop-items" class="services-grid"></section>

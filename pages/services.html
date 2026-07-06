@@ -34,7 +34,7 @@
     <main class="page-shell">
         <section class="page-hero">
             <div class="hero-actions">
-                <a class="btn btn-secondary hidden" id="services-add-button" href="admin.html">Add Service</a>
+                <button class="btn btn-secondary hidden admin-only" id="services-add-toggle">+ Add Service</button>
             </div>
             <h1>Professional Services</h1>
             <p>Search by category or request a consultation for premium field support.</p>
@@ -42,6 +42,27 @@
                 <span class="search-icon" aria-hidden="true">🔎</span>
                 <input id="service-search" class="search-bar" type="text" placeholder="Search services or categories">
             </div>
+        </section>
+
+        <section id="services-add-form" class="panel hidden admin-only">
+            <h2>Add a New Service</h2>
+            <form id="admin-service-form" class="admin-form-shell">
+                <input id="service-name" placeholder="Service name" required>
+                <label class="small" for="service-category">Category *</label>
+                <select id="service-category" title="Service category" aria-label="Service category" required>
+                    <option value="">Select category</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Telecom">Telecom</option>
+                </select>
+                <input id="service-price" type="number" placeholder="Price" required>
+                <input id="service-delivery" placeholder="Delivery timeline (e.g. 2-3 business days)" required>
+                <textarea id="service-description" placeholder="Service description"></textarea>
+                <label class="small">
+                    <input id="service-featured" type="checkbox"> Feature this service on the homepage
+                </label>
+                <button type="submit">Save Service</button>
+                <p id="admin-service-status" class="status-message"></p>
+            </form>
         </section>
 
         <section id="services-list" class="services-grid"></section>

@@ -107,8 +107,6 @@
                                         return '';
                                     }
                                 })();
-
-const repoBase = window.location.pathname.match(/^\/[^/]+/)?.[0] || '';
                 const baseAssetUrl = repoBase ? `${location.origin}${repoBase}` : location.origin;
                 const candidates = [
                     `${baseAssetUrl}/assets/js/lucide.min.js`,

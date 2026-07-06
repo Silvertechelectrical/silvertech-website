@@ -3,12 +3,19 @@ import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/
 import { isAdminUser } from '/js/role-utils.js';
 
 const navLinks = document.querySelector('.nav-links');
-// Use absolute paths so links work the same from any folder depth
-const loginHref = '/pages/login.html';
-const adminHref = '/pages/admin.html';
-const storeHref = '/pages/store/index.html';
-const dashboardAdminHref = '/pages/admin.html';
-const dashboardDeveloperHref = '/pages/developer-dashboard.html';
+
+function getRelativePath(targetPath) {
+  const currentPath = window.location.pathname;
+  const isRootPage = !currentPath.includes('/pages/');
+  const prefix = isRootPage ? 'pages/' : '';
+  return prefix + targetPath;
+}
+
+const loginHref = getRelativePath('login.html');
+const adminHref = getRelativePath('admin.html');
+const storeHref = getRelativePath('store/index.html');
+const dashboardAdminHref = getRelativePath('admin.html');
+const dashboardDeveloperHref = getRelativePath('developer-dashboard.html');
 const currentPath = window.location.pathname;
 const heroState = document.getElementById('hero-user-state');
 

@@ -140,7 +140,7 @@ if (googleLoginBtn) {
 if (logoutBtn) logoutBtn.addEventListener('click', async () => {
   await signOut(auth);
   sessionStorage.removeItem('user');
-  window.location.href = '/index.html';
+  window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
 });
 
 onAuthStateChanged(auth, async (user) => {

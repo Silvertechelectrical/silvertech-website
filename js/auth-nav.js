@@ -1,14 +1,24 @@
-import { auth } from '/js/firebase-init.js';
+import { auth } from './firebase-init.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
-import { isAdminUser } from '/js/role-utils.js';
+import { isAdminUser } from './role-utils.js';
 
 const navLinks = document.querySelector('.nav-links');
 
 function getRelativePath(targetPath) {
-  const currentPath = window.location.pathname;
-  const isRootPage = !currentPath.includes('/pages/');
-  const prefix = isRootPage ? 'pages/' : '';
-  return prefix + targetPath;
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  const segments = currentPath.split('/').filter(Boolean);
+  const pagesIndex = segments.indexOf('pages');
+
+  if (pagesIndex === -1) {
+    return `pages/${targetPath}`;
+  }
+
+  const afterPages = segments.slice(pagesIndex + 1);
+  const hasFileName = afterPages.length && afterPages[afterPages.length - 1].includes('.');
+  const directorySegments = hasFileName ? afterPages.slice(0, -1) : afterPages;
+  const prefix = directorySegments.length ? directorySegments.map(() => '..').join('/') + '/' : '';
+
+  return `${prefix}${targetPath}`;
 }
 
 const loginHref = getRelativePath('login.html');
@@ -16,7 +26,6 @@ const adminHref = getRelativePath('admin.html');
 const storeHref = getRelativePath('store/index.html');
 const dashboardAdminHref = getRelativePath('admin.html');
 const dashboardDeveloperHref = getRelativePath('developer-dashboard.html');
-const currentPath = window.location.pathname;
 const heroState = document.getElementById('hero-user-state');
 
 function updateHeroGreeting(user) {
@@ -118,12 +127,6 @@ async function updateNav(user) {
   const existingUser = navLinks.querySelector('.nav-user');
   if (existingUser) existingUser.remove();
   if (existingLogin) existingLogin.remove();
-
-  // Remove any existing login or user nodes injected previously
-  const existingLogin = navLinks.querySelector('#nav-login-link');
-  if (existingLogin) existingLogin.remove();
-  const existingUser = navLinks.querySelector('.nav-user');
-  if (existingUser) existingUser.remove();
 
   if (user) {
     const isAdmin = await isAdminUser(user);

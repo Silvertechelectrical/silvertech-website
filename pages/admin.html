@@ -19,11 +19,11 @@
 </head>
 <body>
     <nav class="top-nav">
-        <a class="brand-logo" href="dashboard.html">SILVERTECH</a>
+        <a class="brand-logo" href="/pages/dashboard.html">SILVERTECH</a>
         <div class="nav-links">
-            <a class="nav-link-pill" href="services.html">Services</a>
-            <a class="nav-link-pill" href="shop.html">Shop</a>
-            <a class="nav-link-pill" href="store.html">Store</a>
+            <a class="nav-link-pill" href="/pages/services.html">Services</a>
+            <a class="nav-link-pill" href="/pages/shop.html">Shop</a>
+            <a class="nav-link-pill" href="/pages/store/index.html">Store</a>
             <!-- auth-nav will render the user/login UI including logout; remove static duplicate buttons -->
         </div>
     </nav>
@@ -73,7 +73,8 @@
                 <h2>Add a New Service</h2>
                 <form id="admin-service-form" class="admin-form-shell">
                     <input id="service-name" placeholder="Service name" required>
-                    <select id="service-category" title="Service category" required>
+                    <label class="small" for="service-category">Category *</label>
+                    <select id="service-category" title="Service category" aria-label="Service category" required>
                         <option value="">Select category</option>
                         <option value="Electrical">Electrical</option>
                         <option value="Telecom">Telecom</option>
@@ -93,7 +94,8 @@
                 <h2>Your Service Catalog</h2>
                 <div class="catalog-controls">
                     <input id="service-search" class="search-bar" type="search" placeholder="Search services or descriptions...">
-                    <select id="service-filter-category">
+                    <label class="small" for="service-filter-category">Filter category</label>
+                    <select id="service-filter-category" title="Filter service category" aria-label="Filter service category">
                         <option value="">All categories</option>
                         <option value="Electrical">Electrical</option>
                         <option value="Telecom">Telecom</option>

@@ -139,6 +139,12 @@ export async function isDeveloperUser(user) {
   return hasAnyRole(user, [ROLES.developer, ROLES.admin]);
 }
 
+export async function isApprovedDeveloper(user) {
+  if (!user) return false;
+  const profile = await getUserProfile(user);
+  return Boolean(profile && (profile.role === ROLES.developer || profile.role === ROLES.admin) && profile.approved === true);
+}
+
 export async function isServiceProvider(user) {
   if (!user) return false;
   return hasAnyRole(user, [ROLES.service_provider, ROLES.admin]);

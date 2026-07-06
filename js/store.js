@@ -2,11 +2,7 @@ import { auth, db } from './firebase-init.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
 import { collection, addDoc, getDocs, query, where, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { isAdminUser, isApprovedDeveloper } from './role-utils.js';
-
-const cloudinaryConfig = window.CLOUDINARY_CONFIG || {
-  cloudName: '',
-  uploadPreset: ''
-};
+import { uploadToCloudinary as uploadStoreAssetToCloudinary } from './cloudinary-utils.js';
 
 const registrationForm = document.getElementById('registration-form');
 const registrationStatus = document.getElementById('registration-status');
@@ -203,29 +199,6 @@ onAuthStateChanged(auth, async (user) => {
   await updateDeveloperAccess(user);
 });
 
-async function uploadToCloudinary(file) {
-  if (!cloudinaryConfig.cloudName || cloudinaryConfig.cloudName === 'YOUR_CLOUD_NAME' || !cloudinaryConfig.uploadPreset || cloudinaryConfig.uploadPreset === 'YOUR_UNSIGNED_UPLOAD_PRESET') {
-    throw new Error('Cloudinary is not configured yet.');
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-  formData.append('resource_type', 'auto');
-
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  if (!response.ok) {
-    throw new Error(result.error?.message || 'Cloudinary upload failed.');
-  }
-
-  return result.secure_url || null;
-}
-
 if (registrationForm) {
   registrationForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -282,7 +255,7 @@ if (uploadForm) {
 
     try {
       statusEl.textContent = 'Uploading to Cloudinary...';
-      const fileUrl = await uploadToCloudinary(file);
+      const fileUrl = await uploadStoreAssetToCloudinary(file, 'service-documentation');
 
       const adminQuery = query(collection(db, 'users'), where('uid', '==', currentUser.uid), where('role', '==', 'admin'));
       const adminSnapshot = await getDocs(adminQuery);

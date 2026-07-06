@@ -2,6 +2,7 @@ import { auth, db } from './firebase-init.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { isAdminUser, isDeveloperUser } from './role-utils.js';
+import { uploadToCloudinary } from './cloudinary-utils.js';
 
 const uploadShell = document.getElementById('upload-shell');
 const uploadForm = document.getElementById('store-upload-form');
@@ -62,20 +63,8 @@ async function submitListing(event) {
 
   try {
     uploadStatus.textContent = 'Uploading listing...';
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    formData.append('asset', assetFile);
-    formData.append('upload_preset', 'my_silvertechelectrical_preset');
-
-    const response = await fetch(`https://api.cloudinary.com/v1_1/dkv7a8rcm/auto/upload`, {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    if (!response.ok || !data.secure_url) {
-      throw new Error(data.error?.message || 'Upload failed.');
-    }
+    const imageUpload = await uploadToCloudinary(imageFile, 'marketing');
+    const assetUpload = await uploadToCloudinary(assetFile, 'service-documentation');
 
     const listingPayload = {
       name,
@@ -83,7 +72,8 @@ async function submitListing(event) {
       category,
       price,
       description,
-      imageUrl: data.secure_url,
+      imageUrl: imageUpload.secure_url,
+      assetUrl: assetUpload.secure_url,
       assetFileName: assetFile.name,
       notes,
       uploadedBy: currentUser.uid,

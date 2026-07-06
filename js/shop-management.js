@@ -2,9 +2,9 @@ import { auth, db } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { isAdminUser, isApprovedDeveloper } from './role-utils.js';
+import { uploadToCloudinary, FOLDERS } from './cloudinary-utils.js';
 
 let currentUser = null;
-const cloudinaryConfig = window.CLOUDINARY_CONFIG || { cloudName: 'dkv7a8rcm', uploadPreset: 'my_silvertechelectrical_preset' };
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
@@ -27,29 +27,6 @@ onAuthStateChanged(auth, async (user) => {
   loadUserShopItems();
 });
 
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-
-  try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`Cloudinary error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.secure_url;
-  } catch (error) {
-    console.error('Upload failed:', error);
-    throw error;
-  }
-}
-
 async function submitShopItem(formData) {
   if (!currentUser) {
     alert('Please log in to upload items.');
@@ -66,7 +43,7 @@ async function submitShopItem(formData) {
 
   try {
     statusEl.textContent = 'Uploading file...';
-    const fileUrl = await uploadToCloudinary(file);
+    const fileUrl = await uploadToCloudinary(file, FOLDERS.MARKETING);
 
     statusEl.textContent = 'Saving item details...';
     const itemPayload = {

@@ -6,9 +6,12 @@ import {
   onAuthStateChanged,
   deleteUser,
   reauthenticateWithCredential,
-  EmailAuthProvider
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { ensureUserProfile, isAdminUser, isDeveloperUser, getUserRole } from './role-utils.js';
 
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');
@@ -18,6 +21,7 @@ const registerBtn = document.getElementById('registerBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 const showPasswordToggle = document.getElementById('show-password-toggle');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
 
 function setStatus(message, isError = false) {
   if (statusMessage) {
@@ -26,12 +30,50 @@ function setStatus(message, isError = false) {
   }
 }
 
+function getRelativePageUrl(targetPath) {
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  const segments = currentPath.split('/').filter(Boolean);
+  const pagesIndex = segments.indexOf('pages');
+
+  if (pagesIndex === -1) {
+    return `pages/${targetPath}`;
+  }
+
+  const afterPages = segments.slice(pagesIndex + 1);
+  const currentDir = afterPages.length && afterPages[afterPages.length - 1].includes('.')
+    ? afterPages.slice(0, -1)
+    : afterPages;
+  const prefix = currentDir.length ? currentDir.map(() => '..').join('/') + '/' : '';
+  return `${prefix}${targetPath}`;
+}
+
 async function handleLogin() {
   if (!emailInput || !passInput) return;
   try {
-    await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
-    const redirectTarget = sessionStorage.getItem('redirectAfterLogin') || '../index.html';
-    window.location.href = redirectTarget;
+    const credential = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    if (credential.user) {
+      await ensureUserProfile(credential.user);
+    }
+
+    const redirectTarget = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectTarget) {
+      window.location.href = redirectTarget;
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const role = await getUserRole(currentUser);
+      sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
+      const isAdmin = await isAdminUser(currentUser);
+      const isDeveloper = await isDeveloperUser(currentUser);
+      if (isAdmin || isDeveloper) {
+        window.location.href = getRelativePageUrl('developer-dashboard.html');
+        return;
+      }
+    }
+
+    window.location.href = getRelativePageUrl('dashboard.html');
   } catch (error) {
     setStatus(error.message, true);
   }
@@ -40,13 +82,64 @@ async function handleLogin() {
 async function handleRegister() {
   if (!emailInput || !passInput) return;
   try {
-    await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    const credential = await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+    if (credential.user) {
+      await ensureUserProfile(credential.user);
+    }
     setStatus('Account created successfully. Redirecting to your dashboard.');
     setTimeout(() => {
-      window.location.href = '../pages/dashboard.html';
+      // Set session user after registration
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        getUserRole(currentUser).then((role) => {
+          sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
+          window.location.href = getRelativePageUrl('dashboard.html');
+        }).catch(() => window.location.href = getRelativePageUrl('dashboard.html'));
+        return;
+      }
+      window.location.href = getRelativePageUrl('dashboard.html');
     }, 700);
   } catch (error) {
     setStatus(error.message, true);
+  }
+}
+
+async function handleGoogleLogin() {
+  if (!auth) {
+    setStatus('Firebase is not configured yet. Please load the site config first.', true);
+    return;
+  }
+
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    const result = await signInWithPopup(auth, provider);
+    if (result.user) {
+      await ensureUserProfile(result.user);
+    }
+
+    const redirectTarget = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectTarget) {
+      window.location.href = redirectTarget;
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const role = await getUserRole(currentUser);
+      sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
+      const isAdmin = await isAdminUser(currentUser);
+      const isDeveloper = await isDeveloperUser(currentUser);
+      if (isAdmin || isDeveloper) {
+        window.location.href = getRelativePageUrl('developer-dashboard.html');
+        return;
+      }
+    }
+
+    window.location.href = getRelativePageUrl('dashboard.html');
+  } catch (error) {
+    setStatus(error.message || 'Google sign-in failed.', true);
   }
 }
 
@@ -58,12 +151,16 @@ if (showPasswordToggle && passInput) {
 
 if (loginBtn) loginBtn.addEventListener('click', handleLogin);
 if (registerBtn) registerBtn.addEventListener('click', handleRegister);
+if (googleLoginBtn) {
+  googleLoginBtn.addEventListener('click', handleGoogleLogin);
+}
 if (logoutBtn) logoutBtn.addEventListener('click', async () => {
   await signOut(auth);
-  window.location.href = '../index.html';
+  sessionStorage.removeItem('user');
+  window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   const authStatus = document.getElementById('auth-status');
   if (authStatus) {
     authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
@@ -74,6 +171,18 @@ onAuthStateChanged(auth, (user) => {
     } else {
       deleteAccountBtn.classList.add('hidden');
     }
+  }
+
+  // Maintain a lightweight session cache so guard.js can redirect synchronously
+  if (user) {
+    try {
+      const role = await getUserRole(user);
+      sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
+    } catch (err) {
+      console.warn('Failed to populate session user role:', err);
+    }
+  } else {
+    sessionStorage.removeItem('user');
   }
 });
 

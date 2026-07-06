@@ -27,29 +27,24 @@
             <span>Silvertech</span>
         </a>
         <div class="nav-links">
-            <a href="pages/services.html">Services</a>
-            <div class="nav-dropdown">
-                <button type="button" class="nav-dropdown-toggle" aria-expanded="false">Resources</button>
-                <div class="nav-dropdown-menu">
-                    <a href="pages/shop.html">Shop</a>
-                    <a href="pages/silverstore.html">Store</a>
-                    <a href="pages/store-browse.html">Apps</a>
-                </div>
-            </div>
-            <a href="pages/login.html">Login</a>
+            <a class="nav-link-pill" href="pages/services.html">Services</a>
+            <a class="nav-link-pill" href="pages/shop.html">Shop</a>
+            <a class="nav-link-pill" href="pages/store/index.html">Store</a>
+            <a class="btn btn-primary nav-login-btn" href="pages/login.html">Login</a>
         </div>
     </nav>
     
     <header class="hero">
         <div class="hero-content">
             <p class="eyebrow">Serverless • Secure • Scalable</p>
+            <div id="hero-user-state" class="status-banner hidden" role="status"></div>
             <h1>Future-ready electrical and telecom solutions.</h1>
-            <p>Silvertech blends premium digital delivery with real-world field expertise for modern businesses.</p>
+            <p class="hero-subtext">Silvertech blends premium digital delivery with real-world field expertise for modern businesses.</p>
             <div class="hero-actions">
                 <a class="btn btn-primary btn-large" href="pages/services.html">Request Service</a>
-                <a class="btn btn-ghost btn-icon" href="pages/shop.html"><span class="icon icon-cart"></span> Shop</a>
-                <a class="btn btn-ghost btn-icon" href="pages/silverstore.html"><span class="icon icon-home"></span> Developer Store</a>
-                <a class="btn btn-ghost btn-icon" href="pages/store-browse.html"><span class="icon icon-mobile"></span> Apps</a>
+                <a class="btn btn-secondary btn-icon" href="pages/shop.html"><span class="icon icon-cart"></span> Shop</a>
+                <a class="btn btn-secondary btn-icon" href="pages/store/index.html"><span class="icon icon-home"></span> Developer Store</a>
+                <a class="btn btn-secondary btn-icon" href="pages/store/browse.html"><span class="icon icon-mobile"></span> Apps</a>
             </div>
         </div>
     </header>
@@ -57,17 +52,36 @@
     <main class="page-shell">
         <section class="feature-grid">
             <article class="feature-card">
-                <span class="feature-icon" data-lucide="shield"></span>
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3 5 6v5c0 4.2 2.8 7.8 7 9 4.2-1.2 7-4.8 7-9V6l-7-3Z"></path>
+                        <path d="m9.5 12 1.8 1.8 3.2-3.6"></path>
+                    </svg>
+                </span>
                 <h2>Authentication & Access</h2>
                 <p>Protected downloads and service requests keep premium experiences available only to verified users.</p>
             </article>
             <article class="feature-card">
-                <span class="feature-icon" data-lucide="database"></span>
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7h16"></path>
+                        <path d="M7 7V5h10v2"></path>
+                        <path d="M6 7v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"></path>
+                        <path d="M9 11h6"></path>
+                        <path d="M9 15h4"></path>
+                    </svg>
+                </span>
                 <h2>Dynamic Service Delivery</h2>
                 <p>Service listings are pulled from Firestore so updates can be made without touching the frontend code.</p>
             </article>
             <article class="feature-card">
-                <span class="feature-icon" data-lucide="shopping-bag"></span>
+                <span class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="20" r="1.5"></circle>
+                        <circle cx="18" cy="20" r="1.5"></circle>
+                        <path d="M2 4h2l2.2 9.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L16.5 8H6"></path>
+                    </svg>
+                </span>
                 <h2>Freemium Store Experience</h2>
                 <p>Public discovery, gated downloads, and a polished interface turn visitors into productive users.</p>
             </article>
@@ -78,7 +92,7 @@
     <script src="./js/register-sw.js"></script>
     <script type="module" src="./js/firebase-init.js?v=20260627"></script>
     <script type="module" src="./js/auth-nav.js?v=20260627"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.484.0/dist/lucide.min.js" crossorigin="anonymous"></script>
     <script>
         window.addEventListener('load', function() {
             if (window.lucide && typeof window.lucide.createIcons === 'function') {

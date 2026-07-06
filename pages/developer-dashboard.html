@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Dashboard | Silvertech</title>
+    <meta name="description" content="Silvertech developer dashboard for uploads, approvals, and workforce tools.">
+    <meta property="og:title" content="Silvertech Developer Dashboard">
+    <meta property="og:description" content="Access developer tools, upload portals, and approval workflows for Silvertech.">
+    <meta property="og:image" content="../assets/img/silvertech_logo.ico">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="apple-touch-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260702">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="store.html">Store</a>
+            <a class="btn btn-primary nav-login-btn" href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>Developer Dashboard</h1>
+            <p>Access your developer tools, upload portal, and verification controls from one secure dashboard.</p>
+            <div id="developer-actions" class="hero-actions"></div>
+            <div id="developer-dashboard-banner" class="status-banner hidden" role="status"></div>
+        </section>
+
+        <section class="feature-grid">
+            <article class="feature-card">
+                <h2>Upload Listings</h2>
+                <p>Add products and services to the store through a dedicated publishing workflow.</p>
+            </article>
+            <article class="feature-card">
+                <h2>Browse Store</h2>
+                <p>See approved assets and service portfolios in the public store catalog.</p>
+            </article>
+            <article class="feature-card hidden" id="developer-admin-card">
+                <h2>Admin Controls</h2>
+                <p>Admins can approve developers, manage the workforce, and govern the store.</p>
+            </article>
+        </section>
+    </main>
+
+    <script src="../js/load-firebase-config.js"></script>
+    <script src="../js/register-sw.js"></script>
+    <script type="module" src="../js/firebase-init.js"></script>
+    <script type="module" src="../js/auth-nav.js"></script>
+    <script type="module" src="../js/developer-dashboard.js"></script>
+</body>
+</html>

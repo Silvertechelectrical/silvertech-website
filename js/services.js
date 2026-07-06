@@ -26,6 +26,16 @@ const fallbackServices = [
 
 let allServices = [];
 
+function dedupeItems(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = `${item?.id || ''}:${item?.name || ''}:${item?.category || ''}`;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function saveHistory(name, type) {
   const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
   history.unshift({ name, type, at: new Date().toLocaleString() });
@@ -34,18 +44,22 @@ function saveHistory(name, type) {
 
 let currentUser = null;
 const addServiceButton = document.getElementById('services-add-button');
+const servicesAddForm = document.getElementById('services-add-form');
+const servicesAddToggle = document.getElementById('services-add-toggle');
+const adminServiceForm = document.getElementById('admin-service-form');
+const adminServiceStatus = document.getElementById('admin-service-status');
 
 async function updateServiceAccess(user) {
-  if (!addServiceButton) return;
-
-  addServiceButton.classList.add('hidden');
-  if (!user) return;
+  if (!user) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+    return;
+  }
 
   try {
-    const admin = await isAdminUser(user);
-    if (admin) {
-      addServiceButton.classList.remove('hidden');
-    }
+    const isAdmin = await isAdminUser(user);
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.classList.toggle('hidden', !isAdmin);
+    });
   } catch (error) {
     console.error('Error checking service admin status:', error);
   }
@@ -55,6 +69,55 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
   updateServiceAccess(user);
 });
+
+if (servicesAddToggle) {
+  servicesAddToggle.addEventListener('click', () => {
+    if (servicesAddForm) {
+      servicesAddForm.classList.toggle('hidden');
+    }
+  });
+}
+
+if (adminServiceForm) {
+  adminServiceForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentUser) {
+      adminServiceStatus.textContent = 'You must be logged in to add services.';
+      return;
+    }
+
+    const name = document.getElementById('service-name').value.trim();
+    const category = document.getElementById('service-category').value.trim();
+    const price = document.getElementById('service-price').value.trim();
+    const delivery = document.getElementById('service-delivery').value.trim();
+    const description = document.getElementById('service-description').value.trim();
+    const featured = document.getElementById('service-featured').checked;
+
+    if (!name || !category || !price || !delivery) {
+      adminServiceStatus.textContent = 'Please fill in all required fields.';
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'services'), {
+        name,
+        category,
+        price,
+        delivery,
+        description,
+        featured,
+        rating: 4.5,
+        deleted: false,
+        createdAt: serverTimestamp()
+      });
+      adminServiceStatus.textContent = 'Service added successfully!';
+      adminServiceForm.reset();
+      if (servicesAddForm) servicesAddForm.classList.add('hidden');
+    } catch (error) {
+      adminServiceStatus.textContent = `Error: ${error.message}`;
+    }
+  });
+}
 
 async function submitServiceRequest(serviceName, customerPhoneNumber) {
   if (!currentUser) {
@@ -99,7 +162,9 @@ function renderServices(items) {
     return;
   }
 
-  items.forEach((service) => {
+  const uniqueItems = dedupeItems(items);
+
+  uniqueItems.forEach((service) => {
     const card = document.createElement('article');
     const rating = Number(service.rating || 0);
     const displayRating = Number.isFinite(rating) ? rating.toFixed(1) : '4.5';
@@ -115,9 +180,9 @@ function renderServices(items) {
       <p class="meta">${service.category}</p>
       <p>${service.description || 'Premium professional delivery.'}</p>
       <p class="meta">Delivery: ${service.delivery || 'Scheduled'}</p>
-      <p><strong>${service.price} KSH</strong></p>
+      <div class="service-price">${service.price} KSH</div>
       <div class="stars" aria-label="Rating ${displayRating}">
-        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}">★</button>`).join('')}
+        ${[1,2,3,4,5].map((value) => `<button class="star-btn" data-value="${value}" aria-label="Rate ${value} stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.75l2.56 5.2 5.74.83-4.15 4.04 1.0 5.68L12 15.98 6.85 18.5l1.0-5.68L3.7 8.78l5.74-.83L12 2.75Z"/></svg></button>`).join('')}
         <span class="small">${displayRating}</span>
       </div>
       <button class="request-btn">Request Service</button>
@@ -130,6 +195,11 @@ function renderServices(items) {
         return;
       }
 
+      const select = document.getElementById('request-service-name');
+      if (select) {
+        select.value = service.name;
+      }
+      document.getElementById('request-phone')?.focus();
       const phone = prompt('Enter your phone number to submit this service request:');
       if (phone) {
         await submitServiceRequest(service.name, phone.trim());
@@ -195,7 +265,8 @@ function populateRequestOptions(items) {
   const select = document.getElementById('request-service-name');
   if (!select) return;
 
-  select.innerHTML = '<option value="">Select a service</option>' + items.map((service) => `
+  const uniqueItems = dedupeItems(items);
+  select.innerHTML = '<option value="">Select a service</option>' + uniqueItems.map((service) => `
     <option value="${service.name}">${service.name} (${service.category})</option>
   `).join('');
 }

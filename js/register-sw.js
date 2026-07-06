@@ -14,6 +14,9 @@
         scope: scopeUrl.pathname
       });
       console.log('Silvertech service worker registered at', registration.scope);
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
     } catch (error) {
       console.warn('Silvertech service worker registration failed:', error);
     }

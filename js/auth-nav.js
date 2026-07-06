@@ -3,14 +3,49 @@ import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/
 import { isAdminUser } from './role-utils.js';
 
 const navLinks = document.querySelector('.nav-links');
-const isPageRoute = window.location.pathname.includes('/pages/');
-const loginHref = isPageRoute ? 'login.html' : 'pages/login.html';
-const adminHref = isPageRoute ? 'admin.html' : 'pages/admin.html';
+
+function getRelativePath(targetPath) {
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  const segments = currentPath.split('/').filter(Boolean);
+  const pagesIndex = segments.indexOf('pages');
+
+  if (pagesIndex === -1) {
+    return `pages/${targetPath}`;
+  }
+
+  const afterPages = segments.slice(pagesIndex + 1);
+  const hasFileName = afterPages.length && afterPages[afterPages.length - 1].includes('.');
+  const directorySegments = hasFileName ? afterPages.slice(0, -1) : afterPages;
+  const prefix = directorySegments.length ? directorySegments.map(() => '..').join('/') + '/' : '';
+
+  return `${prefix}${targetPath}`;
+}
+
+const loginHref = getRelativePath('login.html');
+const adminHref = getRelativePath('admin.html');
+const storeHref = getRelativePath('store/index.html');
+const dashboardAdminHref = getRelativePath('admin.html');
+const dashboardDeveloperHref = getRelativePath('developer-dashboard.html');
+const heroState = document.getElementById('hero-user-state');
+
+function updateHeroGreeting(user) {
+  if (!heroState) return;
+  if (!user) {
+    heroState.classList.add('hidden');
+    heroState.textContent = '';
+    return;
+  }
+
+  const displayName = user.displayName || user.email || 'there';
+  heroState.textContent = `Welcome back, ${displayName}`;
+  heroState.classList.remove('hidden');
+}
 
 function createLoginLink() {
   const link = document.createElement('a');
   link.href = loginHref;
   link.id = 'nav-login-link';
+  link.className = 'btn btn-primary nav-login-btn';
   link.textContent = 'Login';
   return link;
 }
@@ -18,12 +53,12 @@ function createLoginLink() {
 function createAdminLink() {
   const link = document.createElement('a');
   link.href = adminHref;
-  link.id = 'nav-admin-link';
-  link.textContent = 'Admin';
+  link.className = 'dropdown-item';
+  link.textContent = 'Admin Dashboard';
   return link;
 }
 
-function createUserNav(user) {
+function createUserNav(user, isAdmin = false) {
   const wrapper = document.createElement('span');
   wrapper.className = 'nav-user';
 
@@ -46,9 +81,17 @@ function createUserNav(user) {
     wrapper.appendChild(initials);
   }
 
-  const emailLabel = document.createElement('span');
+  const emailLabel = document.createElement('div');
   emailLabel.className = 'nav-user-email';
-  emailLabel.textContent = user.email || user.displayName || 'User';
+  const emailText = document.createElement('strong');
+  emailText.textContent = user.email || user.displayName || 'User';
+  emailLabel.appendChild(emailText);
+
+  if (isAdmin) {
+    const adminLink = createAdminLink();
+    emailLabel.appendChild(adminLink);
+  }
+
   wrapper.appendChild(emailLabel);
 
   const logoutButton = document.createElement('button');
@@ -82,28 +125,34 @@ async function updateNav(user) {
 
   const existingLogin = navLinks.querySelector('#nav-login-link');
   const existingUser = navLinks.querySelector('.nav-user');
-  const existingAdmin = navLinks.querySelector('#nav-admin-link');
   if (existingUser) existingUser.remove();
-  if (existingAdmin) existingAdmin.remove();
   if (existingLogin) existingLogin.remove();
-
-  navLinks.querySelectorAll('a').forEach((anchor) => {
-    if (anchor.textContent.trim().toLowerCase() === 'login') {
-      anchor.remove();
-    }
-  });
 
   if (user) {
     const isAdmin = await isAdminUser(user);
-    if (isAdmin) {
-      navLinks.appendChild(createAdminLink());
-    }
-    navLinks.appendChild(createUserNav(user));
+    navLinks.appendChild(createUserNav(user, isAdmin));
+
+    const dashboardLink = document.createElement('a');
+    dashboardLink.href = isAdmin ? dashboardAdminHref : dashboardDeveloperHref;
+    dashboardLink.className = 'nav-link-pill';
+    dashboardLink.textContent = 'Dashboard';
+    navLinks.appendChild(dashboardLink);
   } else {
     navLinks.appendChild(createLoginLink());
+    // Also add a public Store link so guests can discover
+    const storeLink = document.createElement('a');
+    storeLink.href = storeHref;
+    storeLink.className = 'nav-link-pill';
+    storeLink.textContent = 'Store';
+    navLinks.appendChild(storeLink);
   }
 }
 
-onAuthStateChanged(auth, async (user) => {
-  await updateNav(user);
-});
+if (auth) {
+  onAuthStateChanged(auth, async (user) => {
+    updateHeroGreeting(user);
+    await updateNav(user);
+  });
+} else {
+  console.warn('Firebase auth is not initialized. Navigation will remain in guest mode.');
+}

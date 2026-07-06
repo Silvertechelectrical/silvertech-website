@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Store Listing | Silvertech</title>
+    <meta name="description" content="Upload a new product or service listing to the Silvertech store with role-based access and media support.">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/silvertech_logo.ico">
+    <link rel="apple-touch-icon" href="../../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../../assets/css/style.css?v=20260702">
+    <script src="../../js/guard.js"></script>
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="../../index.html">
+            <span class="brand-icon icon icon-home"></span>
+            <span>Silvertech</span>
+        </a>
+        <div class="nav-links">
+            <a class="nav-link-pill" href="../services.html">Services</a>
+            <a class="nav-link-pill" href="../shop.html">Shop</a>
+            <a class="nav-link-pill" href="./index.html">Store</a>
+            <a class="btn btn-primary nav-login-btn" href="../login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>Upload a Store Listing</h1>
+            <p>Submit a new product or service to the Silvertech store with image upload and metadata.</p>
+        </section>
+
+        <section class="auth-card" id="upload-shell">
+            <form id="store-upload-form">
+                <label class="small" for="listing-type">Listing Type *</label>
+                <select id="listing-type" required>
+                    <option value="product">Product</option>
+                    <option value="service">Service</option>
+                </select>
+
+                <label class="small" for="listing-name">Title *</label>
+                <input id="listing-name" type="text" placeholder="Product or service title" required>
+
+                <label class="small" for="listing-category">Category *</label>
+                <input id="listing-category" type="text" placeholder="Apps, Templates, Electrical, Telecom" required>
+
+                <label class="small" for="listing-price">Price (KSH)</label>
+                <input id="listing-price" type="number" min="0" placeholder="Price in KSH" required>
+
+                <label class="small" for="listing-description">Description *</label>
+                <textarea id="listing-description" rows="5" placeholder="Describe the product or service" required></textarea>
+
+                <label class="small" for="listing-image">Upload Listing Image *</label>
+                <input id="listing-image" type="file" accept="image/*" required>
+
+                <label class="small" for="listing-file">Upload Asset File *</label>
+                <input id="listing-file" type="file" required>
+
+                <label class="small" for="listing-notes">Additional Notes</label>
+                <textarea id="listing-notes" rows="3" placeholder="Any extra details for admins or buyers."></textarea>
+
+                <button type="submit">Submit Listing</button>
+                <p id="listing-status" class="status-message"></p>
+            </form>
+        </section>
+    </main>
+
+    <script src="../../js/load-firebase-config.js"></script>
+    <script src="../../js/register-sw.js"></script>
+    <script type="module" src="../../js/firebase-init.js"></script>
+    <script type="module" src="../../js/auth-nav.js"></script>
+    <script type="module" src="../../js/store-upload.js"></script>
+</body>
+</html>

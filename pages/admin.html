@@ -15,19 +15,16 @@
     <link rel="apple-touch-icon" href="../assets/img/silvertech_logo.ico">
     <link rel="preconnect" href="https://www.gstatic.com">
     <link rel="preconnect" href="https://www.googleapis.com">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260702">
 </head>
 <body>
     <nav class="top-nav">
-        <a class="brand" href="../index.html">
-            <span class="brand-icon icon icon-home"></span>
-            <span>Silvertech</span>
-        </a>
+        <a class="brand-logo" href="dashboard.html">SILVERTECH</a>
         <div class="nav-links">
-            <a href="services.html">Services</a>
-            <a href="shop.html">Shop</a>
-            <a href="silverstore.html">Store</a>
-            <a href="login.html">Login</a>
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="store/index.html">Store</a>
+            <!-- auth-nav will render the user/login UI including logout; remove static duplicate buttons -->
         </div>
     </nav>
 
@@ -36,6 +33,29 @@
             <h1>Silvertech Admin Panel</h1>
             <p class="small">Manage services, view requests, and keep your admin workflow secure.</p>
             <p id="admin-welcome" class="small"></p>
+            <div id="admin-metrics" class="status-banner hidden" role="status"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Assign Workforce Roles</h2>
+            <p class="small">Update a user's role by email so they can access the appropriate workforce tools.</p>
+            <form id="role-assignment-form" class="admin-form-shell">
+                <label class="small" for="role-assignment-email">User email *</label>
+                <input id="role-assignment-email" type="email" placeholder="user@example.com" required>
+
+                <label class="small" for="role-assignment-role">Role *</label>
+                <select id="role-assignment-role" required>
+                    <option value="">Select role</option>
+                    <option value="user">User</option>
+                    <option value="developer">Developer</option>
+                    <option value="service_provider">Service Provider</option>
+                    <option value="sales_engineer">Sales Engineer</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button type="submit">Update Role</button>
+                <p id="role-assignment-status" class="status-message"></p>
+            </form>
         </section>
 
         <section id="admin-loading" class="auth-card">
@@ -58,44 +78,10 @@
         <section id="admin-shell" class="hidden">
             <div class="feature-grid">
                 <article class="feature-card">
-                    <h2>Your Services</h2>
-                    <p class="small">Edit or remove services available on the public site.</p>
-                </article>
-                <article class="feature-card">
-                    <h2>Add Service</h2>
-                    <p class="small">Publish a new service quickly with a title, category, and price.</p>
-                </article>
-                <article class="feature-card">
-                    <h2>Admin Actions</h2>
-                    <p class="small">Only signed-in admins can save content and manage the service catalog.</p>
-                    <button id="logoutBtn" type="button">Sign Out</button>
+                    <h2>Workforce Command Center</h2>
+                    <p class="small">Assign roles and manage team access permissions from this central hub.</p>
                 </article>
             </div>
-
-            <section class="panel">
-                <h2>Add a New Service</h2>
-                <form id="admin-service-form">
-                    <input id="service-name" placeholder="Service name" required>
-                    <select id="service-category" title="Service category" required>
-                        <option value="">Select category</option>
-                        <option value="Electrical">Electrical</option>
-                        <option value="Telecom">Telecom</option>
-                    </select>
-                    <input id="service-price" type="number" placeholder="Price" required>
-                    <input id="service-delivery" placeholder="Delivery timeline (e.g. 2-3 business days)" required>
-                    <textarea id="service-description" placeholder="Service description"></textarea>
-                    <label class="small">
-                        <input id="service-featured" type="checkbox"> Feature this service on the homepage
-                    </label>
-                    <button type="submit">Save Service</button>
-                    <p id="admin-service-status" class="status-message"></p>
-                </form>
-            </section>
-
-            <section class="panel">
-                <h2>Your Service Catalog</h2>
-                <div id="admin-services-list" class="services-grid"></div>
-            </section>
         </section>
     </main>
 

@@ -2,19 +2,13 @@
   function getRepoBase() {
     try {
       const scriptUrl = document.currentScript && document.currentScript.src;
-      if (scriptUrl) {
-        const pathname = new URL(scriptUrl).pathname;
-        const idx = pathname.indexOf('/js/');
-        if (idx !== -1) {
-          return pathname.substring(0, idx);
-        }
+      if (!scriptUrl) {
+        return '';
       }
 
-      const locationPath = window.location.pathname;
-      if (locationPath.includes('/pages/')) {
-        return locationPath.replace(/\/pages\/.*$/, '');
-      }
-      return locationPath.replace(/\/[^/]*$/, '') || '';
+      const pathname = new URL(scriptUrl).pathname;
+      const idx = pathname.indexOf('/js/');
+      return idx !== -1 ? pathname.substring(0, idx) : '';
     } catch (error) {
       return '';
     }

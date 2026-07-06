@@ -1,12 +1,15 @@
-import { auth } from './firebase-init.js';
+import { auth } from '/js/firebase-init.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
-import { isAdminUser } from './role-utils.js';
+import { isAdminUser } from '/js/role-utils.js';
 
 const navLinks = document.querySelector('.nav-links');
-const isPageRoute = window.location.pathname.includes('/pages/');
-const loginHref = isPageRoute ? 'login.html' : 'pages/login.html';
-const adminHref = isPageRoute ? 'admin.html' : 'pages/admin.html';
-const currentPageName = window.location.pathname.split('/').pop();
+// Use absolute paths so links work the same from any folder depth
+const loginHref = '/pages/login.html';
+const adminHref = '/pages/admin.html';
+const storeHref = '/pages/store/index.html';
+const dashboardAdminHref = '/pages/admin.html';
+const dashboardDeveloperHref = '/pages/developer-dashboard.html';
+const currentPath = window.location.pathname;
 const heroState = document.getElementById('hero-user-state');
 
 function updateHeroGreeting(user) {
@@ -109,27 +112,29 @@ async function updateNav(user) {
   if (existingUser) existingUser.remove();
   if (existingLogin) existingLogin.remove();
 
-  navLinks.querySelectorAll('a, button').forEach((anchor) => {
-    const href = anchor.getAttribute('href');
-    if (href && href.endsWith(currentPageName)) {
-      anchor.classList.add('hidden');
-    }
-    if (anchor.textContent.trim().toLowerCase() === 'login') {
-      anchor.remove();
-    }
-  });
+  // Remove any existing login or user nodes injected previously
+  const existingLogin = navLinks.querySelector('#nav-login-link');
+  if (existingLogin) existingLogin.remove();
+  const existingUser = navLinks.querySelector('.nav-user');
+  if (existingUser) existingUser.remove();
 
   if (user) {
     const isAdmin = await isAdminUser(user);
     navLinks.appendChild(createUserNav(user, isAdmin));
 
     const dashboardLink = document.createElement('a');
-    dashboardLink.href = isAdmin ? 'admin.html' : 'developer-dashboard.html';
+    dashboardLink.href = isAdmin ? dashboardAdminHref : dashboardDeveloperHref;
     dashboardLink.className = 'nav-link-pill';
     dashboardLink.textContent = 'Dashboard';
     navLinks.appendChild(dashboardLink);
   } else {
     navLinks.appendChild(createLoginLink());
+    // Also add a public Store link so guests can discover
+    const storeLink = document.createElement('a');
+    storeLink.href = storeHref;
+    storeLink.className = 'nav-link-pill';
+    storeLink.textContent = 'Store';
+    navLinks.appendChild(storeLink);
   }
 }
 

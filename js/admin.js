@@ -22,10 +22,13 @@ const headerLogoutBtn = document.getElementById('headerLogoutBtn');
 const serviceForm = document.getElementById('admin-service-form');
 const serviceStatus = document.getElementById('admin-service-status');
 const servicesList = document.getElementById('admin-services-list');
+const serviceSearch = document.getElementById('service-search');
+const serviceFilterCategory = document.getElementById('service-filter-category');
 const adminMetrics = document.getElementById('admin-metrics');
 
 let currentUser = null;
 let editingServiceId = null;
+let servicesCache = [];
 
 function showSection(section) {
   [adminLoading, adminUnauthenticated, adminUnauthorized, adminShell].forEach((el) => {
@@ -102,6 +105,7 @@ function renderServiceCards(items) {
         <p class="meta">${service.category}</p>
         <p>${service.description}</p>
         <p class="meta">Price: ${service.price} KSH</p>
+        <p class="meta">Delivery: ${service.delivery || 'Not specified'}</p>
       </article>
     `)
     .join('');
@@ -110,6 +114,10 @@ function renderServiceCards(items) {
     button.addEventListener('click', async () => {
       const serviceId = button.dataset.id;
       if (!serviceId) return;
+
+      // Ask for confirmation to avoid accidental deletes
+      const confirmed = confirm('Are you sure you want to delete this service? This action cannot be undone.');
+      if (!confirmed) return;
 
       try {
         await deleteDoc(doc(db, 'services', serviceId));
@@ -139,10 +147,30 @@ async function loadAdminServices() {
   try {
     const snapshot = await getDocs(query(collection(db, 'services'), orderBy('createdAt', 'desc')));
     const services = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    renderServiceCards(services);
+    servicesCache = services;
+    applyServiceFilters();
   } catch (error) {
     servicesList.innerHTML = `<p class="small">Unable to load services: ${error.message}</p>`;
   }
+}
+
+function applyServiceFilters() {
+  let items = servicesCache.slice();
+  const q = serviceSearch && serviceSearch.value ? serviceSearch.value.trim().toLowerCase() : '';
+  const cat = serviceFilterCategory && serviceFilterCategory.value ? serviceFilterCategory.value : '';
+
+  if (cat) {
+    items = items.filter((s) => (s.category || '').toLowerCase() === cat.toLowerCase());
+  }
+
+  if (q) {
+    items = items.filter((s) => {
+      const hay = `${s.name || ''} ${s.description || ''} ${s.category || ''}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  renderServiceCards(items);
 }
 
 async function isAdmin(user) {
@@ -253,4 +281,12 @@ if (serviceForm) {
       serviceStatus.textContent = error.message;
     }
   });
+}
+
+// Wire up search and filter controls
+if (serviceSearch) {
+  serviceSearch.addEventListener('input', () => applyServiceFilters());
+}
+if (serviceFilterCategory) {
+  serviceFilterCategory.addEventListener('change', () => applyServiceFilters());
 }

@@ -11,7 +11,7 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { ensureUserProfile, isAdminUser, isDeveloperUser } from './role-utils.js';
+import { ensureUserProfile, isAdminUser, isDeveloperUser, getUserRole } from './role-utils.js';
 
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');
@@ -46,15 +46,17 @@ async function handleLogin() {
 
     const currentUser = auth.currentUser;
     if (currentUser) {
+      const role = await getUserRole(currentUser);
+      sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
       const isAdmin = await isAdminUser(currentUser);
       const isDeveloper = await isDeveloperUser(currentUser);
       if (isAdmin || isDeveloper) {
-        window.location.href = '../pages/developer-dashboard.html';
+        window.location.href = '/pages/developer-dashboard.html';
         return;
       }
     }
 
-    window.location.href = '../pages/dashboard.html';
+    window.location.href = '/pages/dashboard.html';
   } catch (error) {
     setStatus(error.message, true);
   }
@@ -69,7 +71,16 @@ async function handleRegister() {
     }
     setStatus('Account created successfully. Redirecting to your dashboard.');
     setTimeout(() => {
-      window.location.href = '../pages/dashboard.html';
+      // Set session user after registration
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        getUserRole(currentUser).then((role) => {
+          sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
+          window.location.href = '/pages/dashboard.html';
+        }).catch(() => window.location.href = '/pages/dashboard.html');
+        return;
+      }
+      window.location.href = '/pages/dashboard.html';
     }, 700);
   } catch (error) {
     setStatus(error.message, true);
@@ -99,15 +110,17 @@ async function handleGoogleLogin() {
 
     const currentUser = auth.currentUser;
     if (currentUser) {
+      const role = await getUserRole(currentUser);
+      sessionStorage.setItem('user', JSON.stringify({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role }));
       const isAdmin = await isAdminUser(currentUser);
       const isDeveloper = await isDeveloperUser(currentUser);
       if (isAdmin || isDeveloper) {
-        window.location.href = '../pages/developer-dashboard.html';
+        window.location.href = '/pages/developer-dashboard.html';
         return;
       }
     }
 
-    window.location.href = '../pages/dashboard.html';
+    window.location.href = '/pages/dashboard.html';
   } catch (error) {
     setStatus(error.message || 'Google sign-in failed.', true);
   }
@@ -126,10 +139,11 @@ if (googleLoginBtn) {
 }
 if (logoutBtn) logoutBtn.addEventListener('click', async () => {
   await signOut(auth);
-  window.location.href = '../index.html';
+  sessionStorage.removeItem('user');
+  window.location.href = '/index.html';
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   const authStatus = document.getElementById('auth-status');
   if (authStatus) {
     authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
@@ -140,6 +154,18 @@ onAuthStateChanged(auth, (user) => {
     } else {
       deleteAccountBtn.classList.add('hidden');
     }
+  }
+
+  // Maintain a lightweight session cache so guard.js can redirect synchronously
+  if (user) {
+    try {
+      const role = await getUserRole(user);
+      sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
+    } catch (err) {
+      console.warn('Failed to populate session user role:', err);
+    }
+  } else {
+    sessionStorage.removeItem('user');
   }
 });
 

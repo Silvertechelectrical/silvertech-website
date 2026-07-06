@@ -24,8 +24,7 @@
             <a class="nav-link-pill" href="services.html">Services</a>
             <a class="nav-link-pill" href="shop.html">Shop</a>
             <a class="nav-link-pill" href="store.html">Store</a>
-            <button id="headerLogoutBtn" class="btn btn-outline header-logout-btn hidden" type="button">Sign Out</button>
-            <a class="btn btn-outline" href="login.html">Login</a>
+            <!-- auth-nav will render the user/login UI including logout; remove static duplicate buttons -->
         </div>
     </nav>
 
@@ -92,7 +91,15 @@
 
             <section class="panel">
                 <h2>Your Service Catalog</h2>
-                <div id="admin-services-list" class="services-grid"></div>
+                                <div class="catalog-controls">
+                                    <input id="service-search" class="search-bar" type="search" placeholder="Search services or descriptions...">
+                                    <select id="service-filter-category">
+                                        <option value="">All categories</option>
+                                        <option value="Electrical">Electrical</option>
+                                        <option value="Telecom">Telecom</option>
+                                    </select>
+                                </div>
+                                <div id="admin-services-list" class="services-grid"></div>
             </section>
         </section>
     </main>

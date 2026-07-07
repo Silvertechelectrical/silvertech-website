@@ -33,33 +33,16 @@
   }
 
   function buildCandidateUrls() {
-    const repoBase = getRepoBase();
     const candidates = [];
     const origin = window.location.origin;
-    const scriptUrl = getCurrentScriptUrl();
-    const currentPath = window.location.pathname;
+    const pathname = window.location.pathname.replace(/\/$/, '');
+    const repoBase = pathname.includes('/silvertech-website') ? '/silvertech-website' : '';
 
-    if (scriptUrl) {
-      candidates.push(new URL('../firebase-config.js', scriptUrl).toString());
-      candidates.push(new URL('./firebase-config.js', scriptUrl).toString());
-      candidates.push(new URL('../js/firebase-config.js', scriptUrl).toString());
-      candidates.push(new URL('./js/firebase-config.js', scriptUrl).toString());
-    }
-
-    if (repoBase) {
-      candidates.push(`${origin}${repoBase}/firebase-config.js`);
-      candidates.push(`${origin}${repoBase}/js/firebase-config.js`);
-    }
-
-    if (currentPath.includes('/silvertech-website')) {
-      candidates.push(`${origin}/silvertech-website/firebase-config.js`);
-      candidates.push(`${origin}/silvertech-website/js/firebase-config.js`);
-    }
-
+    candidates.push(`${origin}${repoBase}/firebase-config.js`);
+    candidates.push(`${origin}${repoBase}/js/firebase-config.js`);
+    candidates.push(`${origin}${repoBase}/js/js/firebase-config.js`);
     candidates.push(`${origin}/firebase-config.js`);
     candidates.push(`${origin}/js/firebase-config.js`);
-    candidates.push(`${origin}/silvertech-website/firebase-config.js`);
-    candidates.push(`${origin}/silvertech-website/js/firebase-config.js`);
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/gh-pages/firebase-config.js');
     candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/main/firebase-config.js');
 

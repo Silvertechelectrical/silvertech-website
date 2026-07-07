@@ -1,37 +1,4 @@
 (function () {
-  function getCurrentScriptUrl() {
-    try {
-      if (document.currentScript && document.currentScript.src) {
-        return new URL(document.currentScript.src, window.location.href);
-      }
-
-      const scripts = Array.from(document.getElementsByTagName('script'));
-      const loaderScript = scripts.find((script) => /load-firebase-config\.js/.test(script.src));
-      if (loaderScript && loaderScript.src) {
-        return new URL(loaderScript.src, window.location.href);
-      }
-    } catch (error) {
-      console.debug('Unable to resolve current script URL:', error);
-    }
-
-    return null;
-  }
-
-  function getRepoBase() {
-    try {
-      const scriptUrl = getCurrentScriptUrl();
-      if (!scriptUrl) {
-        return '';
-      }
-
-      const pathname = scriptUrl.pathname;
-      const idx = pathname.indexOf('/js/');
-      return idx !== -1 ? pathname.substring(0, idx) : '';
-    } catch (error) {
-      return '';
-    }
-  }
-
   function buildCandidateUrls() {
     const candidates = [];
     const origin = window.location.origin;
@@ -40,11 +7,8 @@
 
     candidates.push(`${origin}${repoBase}/firebase-config.js`);
     candidates.push(`${origin}${repoBase}/js/firebase-config.js`);
-    candidates.push(`${origin}${repoBase}/js/js/firebase-config.js`);
     candidates.push(`${origin}/firebase-config.js`);
     candidates.push(`${origin}/js/firebase-config.js`);
-    candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/gh-pages/firebase-config.js');
-    candidates.push('https://raw.githubusercontent.com/Silvertechelectrical/silvertech-website/main/firebase-config.js');
 
     return [...new Set(candidates)];
   }

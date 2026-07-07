@@ -11,7 +11,7 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { ensureUserProfile, isAdminUser, isDeveloperUser, getUserRole } from './role-utils.js';
+import { ensureUserProfile, isAdminUser, isDeveloperUser, getUserRole } from './role-utils.js?v=20260707';
 
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');

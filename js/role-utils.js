@@ -1,4 +1,4 @@
-import { db } from './firebase-init.js';
+import { db } from './firebase-init.js?v=20260707';
 import { getIdTokenResult } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
 import {
   collection,

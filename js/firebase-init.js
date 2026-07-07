@@ -6,7 +6,7 @@ let app = null;
 let auth = null;
 let db = null;
 
-const INLINE_FIREBASE_CONFIG = {
+const fallbackConfig = {
   apiKey: 'AIzaSyDXdPcqyWL6UPSFFT7nYdm90eELbpTj9DA',
   authDomain: 'silvertech-portal.firebaseapp.com',
   projectId: 'silvertech-portal',
@@ -20,7 +20,7 @@ function hasPlaceholderConfig(value) {
 }
 
 function initializeFirebase() {
-  const firebaseConfig = window.FIREBASE_CONFIG || INLINE_FIREBASE_CONFIG;
+  const firebaseConfig = window.FIREBASE_CONFIG || fallbackConfig;
   const configIsValid = firebaseConfig.apiKey && firebaseConfig.projectId && !hasPlaceholderConfig(firebaseConfig.apiKey) && !hasPlaceholderConfig(firebaseConfig.projectId);
   window.__firebaseInitState = { config: firebaseConfig, configIsValid, initialized: false };
 
@@ -46,12 +46,8 @@ let firebaseReady = Promise.resolve();
 
 (async () => {
   if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || !window.FIREBASE_CONFIG.projectId) {
-    try {
-      if (typeof window.loadFirebaseConfig === 'function') {
-        await window.loadFirebaseConfig();
-      }
-    } catch (error) {
-      console.warn('Firebase config loader failed; using inline fallback config.', error);
+    if (typeof window.loadFirebaseConfig === 'function') {
+      await window.loadFirebaseConfig();
     }
   }
   initializeFirebase();

@@ -1,45 +1,19 @@
 (function () {
-  function buildCandidateUrls() {
-    const candidates = [];
-    const origin = window.location.origin;
-    const pathname = window.location.pathname.replace(/\/$/, '');
-    const repoBase = pathname.includes('/silvertech-website') ? '/silvertech-website' : '';
+  const fallbackConfig = {
+    apiKey: 'AIzaSyDXdPcqyWL6UPSFFT7nYdm90eELbpTj9DA',
+    authDomain: 'silvertech-portal.firebaseapp.com',
+    projectId: 'silvertech-portal',
+    storageBucket: 'silvertech-portal.firebasestorage.app',
+    messagingSenderId: '934278665675',
+    appId: '1:934278665675:web:4c0a75d658346a6e34124e'
+  };
 
-    candidates.push(`${origin}${repoBase}/firebase-config.js`);
-    candidates.push(`${origin}${repoBase}/js/firebase-config.js`);
-    candidates.push(`${origin}/firebase-config.js`);
-    candidates.push(`${origin}/js/firebase-config.js`);
-
-    return [...new Set(candidates)];
-  }
-
-  function loadConfigFromUrl(url) {
-    return fetch(url, { cache: 'no-cache', mode: 'cors' })
-      .then((resp) => {
-        if (!resp.ok) return false;
-        return resp.text().then((text) => {
-          const script = document.createElement('script');
-          script.textContent = text;
-          document.head.appendChild(script);
-          return Boolean(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.projectId);
-        });
-      })
-      .catch(() => false);
-  }
-
-  async function loadConfig() {
-    if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.projectId) {
-      return;
+  function loadConfig() {
+    if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || !window.FIREBASE_CONFIG.projectId) {
+      window.FIREBASE_CONFIG = fallbackConfig;
     }
 
-    const candidateUrls = buildCandidateUrls();
-    console.debug('loadFirebaseConfig: candidate URLs', candidateUrls);
-    for (const url of candidateUrls) {
-      // try each URL in sequence until one succeeds
-      // eslint-disable-next-line no-await-in-loop
-      const ok = await loadConfigFromUrl(url);
-      if (ok) return;
-    }
+    return window.FIREBASE_CONFIG;
   }
 
   window.loadFirebaseConfig = loadConfig;

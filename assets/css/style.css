@@ -12,12 +12,27 @@
 }
 
 * { box-sizing: border-box; }
+html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 body {
     margin: 0;
     background: radial-gradient(circle at top, #122033 0%, var(--deep-space) 60%);
     color: #f5f7fb;
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+    -webkit-tap-highlight-color: transparent;
 }
 
 a { color: var(--neon-blue); text-decoration: none; }
@@ -516,6 +531,9 @@ input, textarea, select {
     border: 1px solid var(--glass-border);
     background: rgba(10, 14, 20, 0.74);
     color: #f5f7fb;
+    font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -534,7 +552,10 @@ button {
     background: var(--neon-blue);
     color: var(--deep-space);
     cursor: pointer;
+    font: inherit;
     font-weight: 700;
+    -webkit-appearance: none;
+    appearance: none;
     transition: transform 0.25s ease, background 0.25s ease;
 }
 

@@ -31,7 +31,7 @@ export const ROLE_CAPABILITIES = {
   [ROLES.sales]: ['edit_product_variables', 'browse'],
   [ROLES.sales_engineer]: ['edit_product_variables', 'browse'],
   [ROLES.engineer]: ['edit_product_variables', 'browse'],
-  [ROLES.admin]: ['manage_users', 'manage_services', 'manage_store', 'browse']
+  [ROLES.admin]: ['manage_users', 'manage_services', 'manage_store', 'browse', 'access_dashboard']
 };
 
 export const DEFAULT_ROLE = ROLES.user;
@@ -75,6 +75,8 @@ export async function ensureUserProfile(user) {
       email: user.email || '',
       displayName: user.displayName || '',
       role: DEFAULT_ROLE,
+      position: '',
+      permissions: [],
       status: 'active',
       updatedAt: serverTimestamp()
     };
@@ -89,6 +91,12 @@ export async function ensureUserProfile(user) {
       }
       if (existingProfile.createdAt) {
         profile.createdAt = existingProfile.createdAt;
+      }
+      if (existingProfile.position) {
+        profile.position = existingProfile.position;
+      }
+      if (Array.isArray(existingProfile.permissions)) {
+        profile.permissions = existingProfile.permissions;
       }
     } else {
       profile.createdAt = serverTimestamp();
@@ -118,22 +126,40 @@ export async function hasCapability(user, capability) {
   if (!user || !capability) return false;
   const profile = await getUserProfile(user);
   const role = profile?.role ? normalizeRole(profile.role) : DEFAULT_ROLE;
-  return ROLE_CAPABILITIES[role]?.includes(capability) || false;
+  const roleCaps = ROLE_CAPABILITIES[role] || [];
+  const explicitPermissions = Array.isArray(profile?.permissions) ? profile.permissions : [];
+  return roleCaps.includes(capability) || explicitPermissions.includes(capability);
 }
 
 export async function isAdminUser(user) {
-  if (!user) return false;
+  if (!user) {
+    console.debug('[role-utils] isAdminUser: user is null/undefined');
+    return false;
+  }
 
   try {
     const tokenResult = await getIdTokenResult(user);
     if (tokenResult?.claims?.admin) {
+      console.debug('[role-utils] isAdminUser: ✓ Found admin claim in token');
       return true;
+    } else {
+      console.debug('[role-utils] isAdminUser: Token has no admin claim');
     }
   } catch (error) {
-    console.warn('Admin token lookup failed:', error);
+    console.warn('[role-utils] Admin token lookup failed:', error);
   }
 
-  return hasAnyRole(user, [ROLES.admin]);
+  // Fall back to role check
+  const hasAdminRole = await hasAnyRole(user, [ROLES.admin]);
+  console.debug(`[role-utils] isAdminUser: hasAnyRole(admin) = ${hasAdminRole}`);
+  
+  if (hasAdminRole) {
+    console.debug('[role-utils] isAdminUser: ✓ User has admin role');
+    return true;
+  }
+  
+  console.debug('[role-utils] isAdminUser: ✗ User is NOT admin');
+  return false;
 }
 
 export async function isDeveloperUser(user) {

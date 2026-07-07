@@ -3,10 +3,13 @@
     return;
   }
 
-  const isNestedPage = window.location.pathname.includes('/pages/');
-  const basePath = isNestedPage ? '../' : './';
-  const scopeUrl = new URL(basePath, window.location.href);
-  const swUrl = new URL('sw.js', scopeUrl);
+  const currentPath = window.location.pathname;
+  const pagesIndex = currentPath.indexOf('/pages/');
+  const rootPath = pagesIndex >= 0
+    ? currentPath.slice(0, pagesIndex + 1)
+    : currentPath.replace(/\/[^/]*$/, '/') || '/';
+  const swUrl = new URL(`${rootPath}sw.js`, window.location.origin);
+  const scopeUrl = new URL(rootPath, window.location.origin);
 
   window.addEventListener('load', async () => {
     try {
@@ -14,9 +17,6 @@
         scope: scopeUrl.pathname
       });
       console.log('Silvertech service worker registered at', registration.scope);
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
     } catch (error) {
       console.warn('Silvertech service worker registration failed:', error);
     }

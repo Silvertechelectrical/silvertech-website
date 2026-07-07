@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Role / Position | Silvertech</title>
+    <meta name="description" content="Create and manage custom roles and positions for Silvertech staff and collaborators.">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" type="image/x-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="apple-touch-icon" href="../assets/img/silvertech_logo.ico">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260702">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand-logo" href="admin.html">SILVERTECH</a>
+        <div class="nav-links">
+            <a class="nav-link-pill" href="services.html">Services</a>
+            <a class="nav-link-pill" href="shop.html">Shop</a>
+            <a class="nav-link-pill" href="store/index.html">Store</a>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <h1>Create Role / Position</h1>
+            <p class="small">Add or update custom team positions and their access permissions.</p>
+            <p id="role-position-status" class="status-message"></p>
+            <a class="btn btn-secondary" href="admin.html">Back to Admin</a>
+        </section>
+
+        <section class="panel">
+            <h2>Role / Position Form</h2>
+            <form id="role-position-form" class="admin-form-shell">
+                <input type="hidden" id="role-position-id">
+
+                <label class="small" for="role-position-name">Position name *</label>
+                <input id="role-position-name" type="text" placeholder="Senior Technician" required>
+
+                <label class="small" for="role-position-role">Role name *</label>
+                <input id="role-position-role" list="role-name-options" type="text" placeholder="Type a role name or choose an existing one" required autocomplete="off">
+                <datalist id="role-name-options"></datalist>
+
+                <label class="small" for="role-position-description">Description</label>
+                <textarea id="role-position-description" rows="3" placeholder="Describe the purpose of this position"></textarea>
+
+                <fieldset id="role-position-permissions" class="permission-grid">
+                    <legend class="small">Permissions / access</legend>
+                    <label><input type="checkbox" value="access_dashboard"> Dashboard access</label>
+                    <label><input type="checkbox" value="manage_users"> Manage users</label>
+                    <label><input type="checkbox" value="manage_services"> Manage services</label>
+                    <label><input type="checkbox" value="manage_store"> Manage store</label>
+                    <label><input type="checkbox" value="upload_store_assets"> Upload store assets</label>
+                    <label><input type="checkbox" value="manage_service_media"> Manage service media</label>
+                    <label><input type="checkbox" value="edit_product_variables"> Edit product variables</label>
+                    <label><input type="checkbox" value="request_service"> Request service</label>
+                    <label><input type="checkbox" value="browse"> Browse site</label>
+                </fieldset>
+
+                <div class="catalog-card-actions">
+                    <button type="submit" id="save-role-position-btn">Save Position</button>
+                    <button type="button" id="reset-role-position-btn" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Existing Roles / Positions</h2>
+            <div id="role-position-list" class="history-list"></div>
+        </section>
+    </main>
+
+    <script src="../js/load-firebase-config.js?v=20260708"></script>
+    <script src="../js/register-sw.js?v=20260708"></script>
+    <script type="module" src="../js/firebase-init.js?v=20260708"></script>
+    <script type="module" src="../js/auth-nav.js?v=20260708"></script>
+    <script type="module" src="../js/role-position-manager.js?v=20260708"></script>
+</body>
+</html>

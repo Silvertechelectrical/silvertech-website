@@ -27,7 +27,6 @@
             <a class="nav-link-pill" href="services.html">Services</a>
             <a class="nav-link-pill" href="shop.html">Shop</a>
             <a class="nav-link-pill" href="store.html">Store</a>
-            <a class="btn btn-primary nav-login-btn" href="login.html">Login</a>
         </div>
     </nav>
 
@@ -57,6 +56,8 @@
                 <input id="service-price" type="number" placeholder="Price" required>
                 <input id="service-delivery" placeholder="Delivery timeline (e.g. 2-3 business days)" required>
                 <textarea id="service-description" placeholder="Service description"></textarea>
+                <label class="small" for="service-images">Marketing images</label>
+                <input id="service-images" type="file" accept="image/*" multiple>
                 <label class="small">
                     <input id="service-featured" type="checkbox"> Feature this service on the homepage
                 </label>
@@ -82,10 +83,18 @@
         </section>
     </main>
 
-    <script src="../js/load-firebase-config.js"></script>
-    <script src="../js/register-sw.js"></script>
-    <script type="module" src="../js/firebase-init.js"></script>
-    <script type="module" src="../js/auth-nav.js"></script>
+    <div id="service-drawer" class="purchase-drawer" aria-hidden="true">
+        <div class="purchase-drawer-backdrop" data-close-drawer></div>
+        <div class="purchase-drawer-content">
+            <button type="button" class="drawer-close" data-close-drawer aria-label="Close details">✕</button>
+            <div id="service-detail-shell"></div>
+        </div>
+    </div>
+
+    <script src="../js/load-firebase-config.js?v=20260706"></script>
+    <script src="../js/register-sw.js?v=20260706"></script>
+    <script type="module" src="../js/firebase-init.js?v=20260706"></script>
+    <script type="module" src="../js/auth-nav.js?v=20260706"></script>
     <script type="module" src="../js/services.js"></script>
 </body>
 </html>

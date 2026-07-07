@@ -1,6 +1,6 @@
 import { auth } from './firebase-init.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
-import { isAdminUser } from './role-utils.js';
+import { isAdminUser, getUserRole } from './role-utils.js';
 
 const navLinks = document.querySelector('.nav-links');
 
@@ -28,7 +28,7 @@ const dashboardAdminHref = getRelativePath('admin.html');
 const dashboardDeveloperHref = getRelativePath('developer-dashboard.html');
 const heroState = document.getElementById('hero-user-state');
 
-function updateHeroGreeting(user) {
+async function updateHeroGreeting(user) {
   if (!heroState) return;
   if (!user) {
     heroState.classList.add('hidden');
@@ -37,7 +37,9 @@ function updateHeroGreeting(user) {
   }
 
   const displayName = user.displayName || user.email || 'there';
-  heroState.textContent = `Welcome back, ${displayName}`;
+  const role = await getUserRole(user);
+  const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+  heroState.textContent = `Welcome back, ${displayName} (${roleLabel})`;
   heroState.classList.remove('hidden');
 }
 
@@ -123,36 +125,89 @@ function createUserNav(user, isAdmin = false) {
 async function updateNav(user) {
   if (!navLinks) return;
 
-  const existingLogin = navLinks.querySelector('#nav-login-link');
-  const existingUser = navLinks.querySelector('.nav-user');
-  if (existingUser) existingUser.remove();
-  if (existingLogin) existingLogin.remove();
+  // Remove all dynamic nav items (everything except Services and Shop)
+  const childrenToRemove = [];
+  navLinks.querySelectorAll('a, .nav-user, button').forEach((el) => {
+    const href = el.getAttribute('href');
+    const text = el.textContent.trim();
+    // Keep Services and Shop (static items)
+    if (text !== 'Services' && text !== 'Shop') {
+      childrenToRemove.push(el);
+    }
+  });
+  childrenToRemove.forEach((el) => el.remove());
 
   if (user) {
     const isAdmin = await isAdminUser(user);
-    navLinks.appendChild(createUserNav(user, isAdmin));
+    console.debug(`[auth-nav] User: ${user.email}, isAdmin: ${isAdmin}`);
 
-    const dashboardLink = document.createElement('a');
-    dashboardLink.href = isAdmin ? dashboardAdminHref : dashboardDeveloperHref;
-    dashboardLink.className = 'nav-link-pill';
-    dashboardLink.textContent = 'Dashboard';
-    navLinks.appendChild(dashboardLink);
-  } else {
-    navLinks.appendChild(createLoginLink());
-    // Also add a public Store link so guests can discover
+    // Add Store link for authenticated users
     const storeLink = document.createElement('a');
     storeLink.href = storeHref;
     storeLink.className = 'nav-link-pill';
     storeLink.textContent = 'Store';
     navLinks.appendChild(storeLink);
+
+    // Only show Dashboard for admins - strict check
+    console.debug(`[auth-nav] isAdmin strict check: ${isAdmin} (type: ${typeof isAdmin})`);
+    if (isAdmin === true) {
+      console.debug('[auth-nav] ✓ Adding Dashboard link for admin user');
+      const dashboardLink = document.createElement('a');
+      dashboardLink.href = dashboardAdminHref;
+      dashboardLink.className = 'nav-link-pill';
+      dashboardLink.id = 'nav-dashboard-link';
+      dashboardLink.textContent = 'Dashboard';
+      navLinks.appendChild(dashboardLink);
+    } else {
+      console.debug('[auth-nav] ✗ NOT adding Dashboard - user is not admin');
+    }
+
+    // Add user nav LAST so it appears rightmost
+    navLinks.appendChild(createUserNav(user, isAdmin));
+
+    // FINAL DEFENSIVE CHECK: Remove Dashboard if user is not admin
+    if (!isAdmin) {
+      const allLinks = Array.from(navLinks.querySelectorAll('a'));
+      allLinks.forEach((link) => {
+        const text = link.textContent.trim();
+        const href = link.getAttribute('href') || '';
+        if (text === 'Dashboard' || href.includes('dashboard') || href.includes('admin')) {
+          console.debug('[auth-nav] FINAL CHECK: Removing Dashboard/Admin link from non-admin user');
+          link.remove();
+        }
+      });
+    }
+  } else {
+    // Unauthenticated user: show Store and Login links
+    const storeLink = document.createElement('a');
+    storeLink.href = storeHref;
+    storeLink.className = 'nav-link-pill';
+    storeLink.textContent = 'Store';
+    navLinks.appendChild(storeLink);
+
+    console.debug('[auth-nav] Adding Login link (unauthenticated)');
+    navLinks.appendChild(createLoginLink());
   }
 }
 
-if (auth) {
-  onAuthStateChanged(auth, async (user) => {
-    updateHeroGreeting(user);
-    await updateNav(user);
-  });
-} else {
-  console.warn('Firebase auth is not initialized. Navigation will remain in guest mode.');
-}
+(async () => {
+  if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+      await updateHeroGreeting(user);
+      await updateNav(user);
+    });
+  } else {
+    // Fallback if Firebase auth not immediately available
+    setTimeout(async () => {
+      if (auth) {
+        onAuthStateChanged(auth, async (user) => {
+          await updateHeroGreeting(user);
+          await updateNav(user);
+        });
+      } else {
+        console.warn('Firebase auth is not available.');
+        await updateNav(null);
+      }
+    }, 100);
+  }
+})();

@@ -362,6 +362,12 @@ function renderServices(items) {
 
     card.querySelector('.request-btn').addEventListener('click', async (event) => {
       event.stopPropagation();
+      if (!currentUser) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+        window.location.href = '../pages/login.html';
+        return;
+      }
+
       const select = document.getElementById('request-service-name');
       if (select) {
         select.value = service.name;
@@ -411,19 +417,21 @@ async function loadServices() {
   const requestForm = document.getElementById('service-request-form');
   if (requestForm) {
     requestForm.addEventListener('submit', async (event) => {
-      // Web3Forms will handle the HTTP submission automatically.
-      // We just need to log to Firestore if the user is authenticated.
+      event.preventDefault();
+      if (!currentUser) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+        window.location.href = '../pages/login.html';
+        return;
+      }
+
       const serviceName = document.getElementById('request-service-name').value;
       const phone = document.getElementById('request-phone').value.trim();
       const name = document.getElementById('request-name').value.trim();
       const email = document.getElementById('request-email').value.trim();
       const details = document.getElementById('request-details').value.trim();
 
-      if (currentUser) {
-        // Optionally log the request to Firestore for internal tracking
-        await submitServiceRequest(serviceName, phone, name, email, details);
-      }
-      // Web3Forms will redirect on success, so we don't need to reset the form here.
+      await submitServiceRequest(serviceName, phone, name, email, details);
+      requestForm.reset();
     });
   }
 

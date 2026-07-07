@@ -1,4 +1,4 @@
-const CACHE_NAME = 'silvertech-cache-v2';
+const CACHE_NAME = 'silvertech-cache-v3';
 const BASE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '/';
 const normalize = (path) => (BASE_PATH.endsWith('/') ? `${BASE_PATH}${path.replace(/^[\/]+/, '')}` : `${BASE_PATH}/${path.replace(/^[\/]+/, '')}`);
 const ASSETS_TO_CACHE = [

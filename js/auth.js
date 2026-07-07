@@ -22,6 +22,8 @@ const logoutBtn = document.getElementById('logoutBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 const showPasswordToggle = document.getElementById('show-password-toggle');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
+const DEMO_USERS_KEY = 'silvertech-demo-users';
+const DEMO_SESSION_KEY = 'silvertech-demo-user';
 
 function setStatus(message, isError = false) {
   if (statusMessage) {
@@ -47,8 +49,100 @@ function getRelativePageUrl(targetPath) {
   return `${prefix}${targetPath}`;
 }
 
+function getDemoUsers() {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_USERS_KEY) || '{}');
+  } catch (error) {
+    console.warn('Unable to read demo users:', error);
+    return {};
+  }
+}
+
+function saveDemoUsers(users) {
+  localStorage.setItem(DEMO_USERS_KEY, JSON.stringify(users));
+}
+
+function persistDemoSession(user) {
+  sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(user));
+  sessionStorage.setItem('user', JSON.stringify(user));
+}
+
+function clearDemoSession() {
+  sessionStorage.removeItem(DEMO_SESSION_KEY);
+  sessionStorage.removeItem('user');
+}
+
+function getDemoUser(email) {
+  const users = getDemoUsers();
+  return users[email.toLowerCase()] || null;
+}
+
+function getDemoRole(email) {
+  if (email.toLowerCase().includes('admin')) return 'admin';
+  if (email.toLowerCase().includes('developer')) return 'developer';
+  return 'user';
+}
+
+function syncDemoAuthUi(user = null) {
+  const authStatus = document.getElementById('auth-status');
+  if (authStatus) {
+    authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
+  }
+  if (deleteAccountBtn) {
+    deleteAccountBtn.classList.toggle('hidden', !user);
+  }
+}
+
+async function handleDemoLogin() {
+  if (!emailInput || !passInput) return;
+  const email = emailInput.value.trim();
+  const password = passInput.value;
+  const users = getDemoUsers();
+  const storedUser = users[email.toLowerCase()];
+
+  if (!storedUser || storedUser.password !== password) {
+    setStatus('Invalid demo account. Create an account first or use the seeded demo credentials.', true);
+    return;
+  }
+
+  const sessionUser = { uid: `demo-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`, email, displayName: email.split('@')[0], role: getDemoRole(email) };
+  persistDemoSession(sessionUser);
+  syncDemoAuthUi(sessionUser);
+  setStatus('Signed in in demo mode.');
+  window.location.href = getRelativePageUrl('dashboard.html');
+}
+
+async function handleDemoRegister() {
+  if (!emailInput || !passInput) return;
+  const email = emailInput.value.trim();
+  const password = passInput.value;
+  if (!email || !password) {
+    setStatus('Enter an email and password to create a demo account.', true);
+    return;
+  }
+
+  const users = getDemoUsers();
+  if (users[email.toLowerCase()]) {
+    setStatus('That demo account already exists. Try signing in instead.', true);
+    return;
+  }
+
+  users[email.toLowerCase()] = { email, password };
+  saveDemoUsers(users);
+  const sessionUser = { uid: `demo-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`, email, displayName: email.split('@')[0], role: getDemoRole(email) };
+  persistDemoSession(sessionUser);
+  syncDemoAuthUi(sessionUser);
+  setStatus('Demo account created successfully.');
+  window.location.href = getRelativePageUrl('dashboard.html');
+}
+
 async function handleLogin() {
   if (!emailInput || !passInput) return;
+  if (!auth) {
+    await handleDemoLogin();
+    return;
+  }
+
   try {
     const credential = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
     if (credential.user) {
@@ -81,6 +175,11 @@ async function handleLogin() {
 
 async function handleRegister() {
   if (!emailInput || !passInput) return;
+  if (!auth) {
+    await handleDemoRegister();
+    return;
+  }
+
   try {
     const credential = await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
     if (credential.user) {
@@ -88,7 +187,6 @@ async function handleRegister() {
     }
     setStatus('Account created successfully. Redirecting to your dashboard.');
     setTimeout(() => {
-      // Set session user after registration
       const currentUser = auth.currentUser;
       if (currentUser) {
         getUserRole(currentUser).then((role) => {
@@ -106,7 +204,7 @@ async function handleRegister() {
 
 async function handleGoogleLogin() {
   if (!auth) {
-    setStatus('Firebase is not configured yet. Please load the site config first.', true);
+    setStatus('Firebase is not configured yet. Demo mode is active, so use email/password to continue.', true);
     return;
   }
 
@@ -155,45 +253,63 @@ if (googleLoginBtn) {
   googleLoginBtn.addEventListener('click', handleGoogleLogin);
 }
 if (logoutBtn) logoutBtn.addEventListener('click', async () => {
-  await signOut(auth);
-  sessionStorage.removeItem('user');
+  if (auth) {
+    await signOut(auth);
+  }
+  clearDemoSession();
   window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
 });
 
-onAuthStateChanged(auth, async (user) => {
-  const authStatus = document.getElementById('auth-status');
-  if (authStatus) {
-    authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
-  }
-  if (deleteAccountBtn) {
-    if (user) {
-      deleteAccountBtn.classList.remove('hidden');
-    } else {
-      deleteAccountBtn.classList.add('hidden');
+if (auth) {
+  onAuthStateChanged(auth, async (user) => {
+    const authStatus = document.getElementById('auth-status');
+    if (authStatus) {
+      authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
     }
-  }
+    if (deleteAccountBtn) {
+      deleteAccountBtn.classList.toggle('hidden', !user);
+    }
 
-  // Maintain a lightweight session cache so guard.js can redirect synchronously
-  if (user) {
-    try {
-      const role = await getUserRole(user);
-      sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
-    } catch (err) {
-      console.warn('Failed to populate session user role:', err);
+    if (user) {
+      try {
+        const role = await getUserRole(user);
+        sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
+      } catch (err) {
+        console.warn('Failed to populate session user role:', err);
+      }
+    } else {
+      sessionStorage.removeItem('user');
     }
+  });
+} else {
+  const demoUser = sessionStorage.getItem(DEMO_SESSION_KEY);
+  if (demoUser) {
+    syncDemoAuthUi(JSON.parse(demoUser));
   } else {
-    sessionStorage.removeItem('user');
+    syncDemoAuthUi();
   }
-});
+}
 
 if (deleteAccountBtn) {
   deleteAccountBtn.addEventListener('click', async () => {
+    if (!auth) {
+      const demoUser = sessionStorage.getItem(DEMO_SESSION_KEY);
+      if (!demoUser) return setStatus('No demo user signed in', true);
+      const parsedUser = JSON.parse(demoUser);
+      const users = getDemoUsers();
+      delete users[parsedUser.email.toLowerCase()];
+      saveDemoUsers(users);
+      clearDemoSession();
+      syncDemoAuthUi();
+      setStatus('Demo account deleted.');
+      return;
+    }
+
     const user = auth.currentUser;
     if (!user) return setStatus('No user signed in', true);
     const confirmed = confirm('Delete your account? This action is permanent and will remove your profile. Are you sure?');
     if (!confirmed) return;
 
-    // Only support email/password reauthentication from the client.
     const providerId = user.providerData && user.providerData[0] && user.providerData[0].providerId;
     if (providerId && providerId !== 'password') {
       return setStatus('Please reauthenticate via your sign-in provider or contact support to delete this account.', true);
@@ -211,7 +327,6 @@ if (deleteAccountBtn) {
     }
 
     try {
-      // Attempt to delete the Firestore user document (rules now allow owners to delete their doc).
       await deleteDoc(doc(db, 'users', user.uid));
     } catch (err) {
       console.warn('Failed to delete user document:', err);

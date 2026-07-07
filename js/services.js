@@ -417,8 +417,8 @@ async function loadServices() {
   const requestForm = document.getElementById('service-request-form');
   if (requestForm) {
     requestForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
       if (!currentUser) {
+        event.preventDefault();
         sessionStorage.setItem('redirectAfterLogin', window.location.href);
         window.location.href = '../pages/login.html';
         return;
@@ -431,7 +431,6 @@ async function loadServices() {
       const details = document.getElementById('request-details').value.trim();
 
       await submitServiceRequest(serviceName, phone, name, email, details);
-      requestForm.reset();
     });
   }
 

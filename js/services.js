@@ -415,7 +415,14 @@ async function loadServices() {
   }
 
   const requestForm = document.getElementById('service-request-form');
+  const requestStatus = document.getElementById('request-status');
   if (requestForm) {
+    requestForm.addEventListener('input', () => {
+      if (requestStatus) {
+        requestStatus.textContent = '';
+      }
+    });
+
     requestForm.addEventListener('submit', async (event) => {
       if (!currentUser) {
         event.preventDefault();
@@ -430,7 +437,18 @@ async function loadServices() {
       const email = document.getElementById('request-email').value.trim();
       const details = document.getElementById('request-details').value.trim();
 
-      await submitServiceRequest(serviceName, phone, name, email, details);
+      try {
+        await submitServiceRequest(serviceName, phone, name, email, details);
+        if (requestStatus) {
+          requestStatus.textContent = 'Your request was sent successfully. We will contact you soon.';
+          requestStatus.className = 'status-message success';
+        }
+      } catch (error) {
+        if (requestStatus) {
+          requestStatus.textContent = 'We could not send your request. Please try again.';
+          requestStatus.className = 'status-message error';
+        }
+      }
     });
   }
 

@@ -289,36 +289,31 @@ if (adminServiceForm) {
   });
 }
 
-async function submitServiceRequest(serviceName, customerPhoneNumber) {
-  if (!currentUser) {
-    sessionStorage.setItem('redirectAfterLogin', window.location.href);
-    window.location.href = '../pages/login.html';
-    return false;
-  }
+async function submitServiceRequest(serviceName, customerPhoneNumber, customerName, customerEmail, additionalDetails) {
+  // The Web3Forms form will handle the HTTP submission.
+  // This function is kept for backwards compatibility and for logging to Firestore when user is authenticated.
+  if (currentUser) {
+    const requestPayload = {
+      userId: currentUser.uid,
+      serviceName,
+      customerPhoneNumber,
+      customerName: customerName || currentUser.displayName || 'Anonymous',
+      customerEmail: customerEmail || currentUser.email || '',
+      additionalDetails: additionalDetails || '',
+      status: 'pending',
+      createdAt: serverTimestamp()
+    };
 
-  if (!customerPhoneNumber) {
-    alert('Please enter a phone number to submit your request.');
-    return false;
+    try {
+      await addDoc(collection(db, 'requests'), requestPayload);
+      saveHistory(serviceName, 'request');
+      return true;
+    } catch (error) {
+      console.error('Error logging request to Firestore:', error);
+      return false;
+    }
   }
-
-  const requestPayload = {
-    userId: currentUser.uid,
-    serviceName,
-    customerPhoneNumber,
-    status: 'pending',
-    createdAt: serverTimestamp()
-  };
-
-  try {
-    await addDoc(collection(db, 'requests'), requestPayload);
-    saveHistory(serviceName, 'request');
-    document.getElementById('request-status').textContent = 'Request submitted successfully. We will contact you soon.';
-    return true;
-  } catch (error) {
-    console.error('Error creating request:', error);
-    document.getElementById('request-status').textContent = 'Unable to submit request. Please try again later.';
-    return false;
-  }
+  return false;
 }
 
 function renderServices(items) {
@@ -367,21 +362,11 @@ function renderServices(items) {
 
     card.querySelector('.request-btn').addEventListener('click', async (event) => {
       event.stopPropagation();
-      if (!currentUser) {
-        sessionStorage.setItem('redirectAfterLogin', window.location.href);
-        window.location.href = '../pages/login.html';
-        return;
-      }
-
       const select = document.getElementById('request-service-name');
       if (select) {
         select.value = service.name;
       }
-      document.getElementById('request-phone')?.focus();
-      const phone = prompt('Enter your phone number to submit this service request:');
-      if (phone) {
-        await submitServiceRequest(service.name, phone.trim());
-      }
+      document.getElementById('request-name')?.focus();
     });
     card.querySelectorAll('.star-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -426,11 +411,19 @@ async function loadServices() {
   const requestForm = document.getElementById('service-request-form');
   if (requestForm) {
     requestForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
+      // Web3Forms will handle the HTTP submission automatically.
+      // We just need to log to Firestore if the user is authenticated.
       const serviceName = document.getElementById('request-service-name').value;
       const phone = document.getElementById('request-phone').value.trim();
-      await submitServiceRequest(serviceName, phone);
-      requestForm.reset();
+      const name = document.getElementById('request-name').value.trim();
+      const email = document.getElementById('request-email').value.trim();
+      const details = document.getElementById('request-details').value.trim();
+
+      if (currentUser) {
+        // Optionally log the request to Firestore for internal tracking
+        await submitServiceRequest(serviceName, phone, name, email, details);
+      }
+      // Web3Forms will redirect on success, so we don't need to reset the form here.
     });
   }
 

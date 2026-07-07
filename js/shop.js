@@ -201,6 +201,12 @@ function renderShopItems(items) {
     `;
 
     card.querySelector('.request-btn').addEventListener('click', () => {
+      if (!currentUser) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+        window.location.href = '../pages/login.html';
+        return;
+      }
+
       const drawer = document.getElementById('purchase-drawer');
       const select = document.getElementById('purchase-item-name');
       const emailInput = document.getElementById('purchase-email');
@@ -266,6 +272,12 @@ async function loadShopItems() {
   if (purchaseForm) {
     purchaseForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (!currentUser) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+        window.location.href = '../pages/login.html';
+        return;
+      }
+
       const itemName = document.getElementById('purchase-item-name').value;
       const email = document.getElementById('purchase-email').value.trim();
       const phone = document.getElementById('purchase-phone').value.trim();

@@ -6,12 +6,21 @@ let app = null;
 let auth = null;
 let db = null;
 
+const INLINE_FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDXdPcqyWL6UPSFFT7nYdm90eELbpTj9DA',
+  authDomain: 'silvertech-portal.firebaseapp.com',
+  projectId: 'silvertech-portal',
+  storageBucket: 'silvertech-portal.firebasestorage.app',
+  messagingSenderId: '934278665675',
+  appId: '1:934278665675:web:4c0a75d658346a6e34124e'
+};
+
 function hasPlaceholderConfig(value) {
   return !value || /demo|placeholder|example/i.test(String(value));
 }
 
 function initializeFirebase() {
-  const firebaseConfig = window.FIREBASE_CONFIG || {};
+  const firebaseConfig = window.FIREBASE_CONFIG || INLINE_FIREBASE_CONFIG;
   const configIsValid = firebaseConfig.apiKey && firebaseConfig.projectId && !hasPlaceholderConfig(firebaseConfig.apiKey) && !hasPlaceholderConfig(firebaseConfig.projectId);
   window.__firebaseInitState = { config: firebaseConfig, configIsValid, initialized: false };
 
@@ -37,8 +46,12 @@ let firebaseReady = Promise.resolve();
 
 (async () => {
   if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || !window.FIREBASE_CONFIG.projectId) {
-    if (typeof window.loadFirebaseConfig === 'function') {
-      await window.loadFirebaseConfig();
+    try {
+      if (typeof window.loadFirebaseConfig === 'function') {
+        await window.loadFirebaseConfig();
+      }
+    } catch (error) {
+      console.warn('Firebase config loader failed; using inline fallback config.', error);
     }
   }
   initializeFirebase();

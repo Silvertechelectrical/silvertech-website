@@ -71,12 +71,23 @@
         <section class="request-panel">
             <h2>Submit a Service Request</h2>
             <p>Choose a service, add your phone number, and our team will contact you.</p>
-            <form id="service-request-form">
+            <form id="service-request-form" action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="1e62f3dc-6a00-4cde-9d0a-058e1ebbb39a">
+                <input type="hidden" name="from_name" value="Silvertech Service Request">
+                <input type="hidden" name="to_email" value="support@silvertech.electrical">
+                <input type="hidden" name="subject" value="New Service Request from Silvertech Website">
+                <input type="hidden" name="redirect" value="https://silvertechelectrical.github.io/silvertech-website/pages/services.html">
+                
                 <label class="small" for="request-service-name">Select a service</label>
-                <select id="request-service-name" title="Select a service" required>
+                <select id="request-service-name" name="service" title="Select a service" required>
                     <option value="">Select a service</option>
                 </select>
-                <input id="request-phone" type="tel" placeholder="Your phone number" required>
+                
+                <input type="text" id="request-name" name="name" placeholder="Your Full Name" required>
+                <input type="email" id="request-email" name="email" placeholder="Your Email" required>
+                <input id="request-phone" type="tel" name="phone" placeholder="Your phone number" required>
+                <textarea id="request-details" name="message" placeholder="Additional service details (optional)"></textarea>
+                
                 <button type="submit">Send Request</button>
             </form>
             <p id="request-status" class="status-message"></p>

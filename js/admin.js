@@ -31,6 +31,10 @@ const recentlyDeletedList = document.getElementById('recently-deleted-list');
 const adminMetrics = document.getElementById('admin-metrics');
 const roleAssignmentForm = document.getElementById('role-assignment-form');
 const roleAssignmentStatus = document.getElementById('role-assignment-status');
+const roleAssignmentEmailInput = document.getElementById('role-assignment-email');
+const roleAssignmentPositionInput = document.getElementById('role-assignment-position');
+const roleAssignmentRoleInput = document.getElementById('role-assignment-role');
+const roleAssignmentPermissionInputs = Array.from(document.querySelectorAll('#permission-assignments input[type="checkbox"]'));
 
 let currentUser = null;
 let editingServiceId = null;
@@ -165,6 +169,88 @@ function renderServiceCards(items) {
   });
 }
 
+function getSelectedPermissions() {
+  return roleAssignmentPermissionInputs
+    .filter((input) => input.checked)
+    .map((input) => input.value);
+}
+
+function setPermissionValues(values = []) {
+  roleAssignmentPermissionInputs.forEach((input) => {
+    input.checked = values.includes(input.value);
+  });
+}
+
+function renderEmailOptions(emails = []) {
+  const dataList = document.getElementById('role-email-options');
+  if (!dataList) return;
+  dataList.innerHTML = emails
+    .filter(Boolean)
+    .map((email) => `<option value="${email}">`)
+    .join('');
+}
+
+function renderRoleOptions(roles = []) {
+  const dataList = document.getElementById('role-name-options');
+  if (!dataList) return;
+
+  const predefinedRoles = ['user', 'developer', 'service_provider', 'sales_engineer', 'engineer', 'admin'];
+  const combinedRoles = Array.from(new Set([...predefinedRoles, ...roles.filter(Boolean)]))
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+  dataList.innerHTML = combinedRoles.map((role) => `<option value="${role}">`).join('');
+}
+
+async function loadRoleOptions() {
+  try {
+    const snapshot = await getDocs(query(collection(db, 'role-positions'), orderBy('role'), limit(200)));
+    const roles = snapshot.docs
+      .map((docSnap) => docSnap.data()?.role)
+      .filter((role) => typeof role === 'string' && role.trim());
+    renderRoleOptions(roles);
+  } catch (error) {
+    console.warn('Unable to load role suggestions:', error);
+    renderRoleOptions();
+  }
+}
+
+async function loadUserEmails() {
+  try {
+    const snapshot = await getDocs(query(collection(db, 'users'), orderBy('email'), limit(200)));
+    const emails = snapshot.docs
+      .map((doc) => doc.data()?.email)
+      .filter((email) => typeof email === 'string')
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    renderEmailOptions([...new Set(emails)]);
+  } catch (error) {
+    console.warn('Unable to load user email options:', error);
+  }
+}
+
+async function prefillRoleData(email) {
+  const address = (email || '').trim();
+  if (!address) return;
+
+  try {
+    const snapshot = await getDocs(query(collection(db, 'users'), where('email', '==', address), limit(1)));
+    if (snapshot.empty) {
+      roleAssignmentStatus.textContent = 'No saved profile found for that email.';
+      return;
+    }
+
+    const userDoc = snapshot.docs[0].data();
+    if (roleAssignmentRoleInput) {
+      roleAssignmentRoleInput.value = userDoc.role || '';
+    }
+    roleAssignmentPositionInput.value = userDoc.position || '';
+    setPermissionValues(Array.isArray(userDoc.permissions) ? userDoc.permissions : []);
+    roleAssignmentStatus.textContent = `Loaded profile for ${address}.`;
+  } catch (error) {
+    console.warn('Unable to prefill role data:', error);
+    roleAssignmentStatus.textContent = 'Unable to load saved profile data.';
+  }
+}
+
 async function loadAdminServices(append = false) {
   if (!servicesList || isFetching) return;
   isFetching = true;
@@ -219,45 +305,6 @@ function applyServiceFilters() {
   renderServiceCards(items);
 }
 
-async function updateUserRole(email, role) {
-  const normalizedEmail = (email || '').trim().toLowerCase();
-  if (!normalizedEmail || !role) {
-    if (roleAssignmentStatus) {
-      roleAssignmentStatus.textContent = 'Please provide an email and choose a role.';
-    }
-    return false;
-  }
-
-  try {
-    const queryRef = query(collection(db, 'users'), where('email', '==', normalizedEmail));
-    const snapshot = await getDocs(queryRef);
-
-    if (snapshot.empty) {
-      if (roleAssignmentStatus) {
-        roleAssignmentStatus.textContent = `No user found for ${normalizedEmail}.`;
-      }
-      return false;
-    }
-
-    const userDoc = snapshot.docs[0];
-    await updateDoc(doc(db, 'users', userDoc.id), {
-      role,
-      updatedAt: serverTimestamp()
-    });
-
-    if (roleAssignmentStatus) {
-      roleAssignmentStatus.textContent = `Updated ${normalizedEmail} to ${role}.`;
-    }
-    return true;
-  } catch (error) {
-    console.error('Failed to update user role:', error);
-    if (roleAssignmentStatus) {
-      roleAssignmentStatus.textContent = 'Unable to update role right now.';
-    }
-    return false;
-  }
-}
-
 async function isAdmin(user) {
   if (!user) return false;
   console.log('Admin check user:', { uid: user.uid, email: user.email });
@@ -304,6 +351,8 @@ onAuthStateChanged(auth, async (user) => {
   adminWelcome.textContent = `Welcome, ${user.email}`;
   if (headerLogoutBtn) headerLogoutBtn.classList.remove('hidden');
   showSection(adminShell);
+  await loadUserEmails();
+  await loadRoleOptions();
   await loadAdminServices();
   await loadAdminMetrics();
 });
@@ -316,8 +365,12 @@ if (roleAssignmentForm) {
   roleAssignmentForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('role-assignment-email').value;
-    const role = document.getElementById('role-assignment-role').value;
-    await updateUserRole(email, role);
+    const role = roleAssignmentRoleInput ? roleAssignmentRoleInput.value.trim() : '';
+}
+
+if (roleAssignmentEmailInput) {
+  roleAssignmentEmailInput.addEventListener('change', async () => {
+    await prefillRoleData(roleAssignmentEmailInput.value);
   });
 }
 

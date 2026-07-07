@@ -1,7 +1,8 @@
 import { auth, db } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { isAdminUser } from './role-utils.js';
+import { collection, getDocs, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { isAdminUser, isSalesEngineerAdmin, isServiceProvider } from './role-utils.js';
+import { uploadToCloudinary, FOLDERS } from './cloudinary-utils.js';
 
 const fallbackServices = [
   {
@@ -43,11 +44,25 @@ function saveHistory(name, type) {
 }
 
 let currentUser = null;
-const addServiceButton = document.getElementById('services-add-button');
 const servicesAddForm = document.getElementById('services-add-form');
 const servicesAddToggle = document.getElementById('services-add-toggle');
 const adminServiceForm = document.getElementById('admin-service-form');
 const adminServiceStatus = document.getElementById('admin-service-status');
+const detailDrawer = document.getElementById('service-drawer');
+const detailShell = document.getElementById('service-detail-shell');
+
+function getStoredUserRole(user) {
+  if (!user) return null;
+  try {
+    const storedUser = sessionStorage.getItem('user');
+    if (!storedUser) return null;
+    const parsed = JSON.parse(storedUser);
+    const role = String(parsed?.role || '').toLowerCase();
+    return role || null;
+  } catch (error) {
+    return null;
+  }
+}
 
 async function updateServiceAccess(user) {
   if (!user) {
@@ -56,13 +71,158 @@ async function updateServiceAccess(user) {
   }
 
   try {
-    const isAdmin = await isAdminUser(user);
+    const allowed = await canManageService(user);
     document.querySelectorAll('.admin-only').forEach(el => {
-      el.classList.toggle('hidden', !isAdmin);
+      el.classList.toggle('hidden', !allowed);
     });
   } catch (error) {
     console.error('Error checking service admin status:', error);
   }
+}
+
+async function canManageService(user) {
+  if (!user) return false;
+
+  const storedRole = getStoredUserRole(user);
+  if (['admin', 'service_provider', 'sales', 'sales_engineer', 'engineer'].includes(storedRole)) {
+    return true;
+  }
+
+  const [isAdmin, isProvider, isSales] = await Promise.all([
+    isAdminUser(user),
+    isServiceProvider(user),
+    isSalesEngineerAdmin(user)
+  ]);
+  return isAdmin || isProvider || isSales;
+}
+
+async function openServiceDrawer(service) {
+  if (!detailDrawer || !detailShell) return;
+  const imageUrls = Array.isArray(service?.images) && service.images.length
+    ? service.images
+    : service?.imageUrl
+      ? [service.imageUrl]
+      : [];
+  const imageMarkup = imageUrls.length
+    ? `<div class="detail-gallery">${imageUrls.map((url) => `<img class="detail-image" src="${url}" alt="${service.name}" onerror="this.onerror=null;this.src='../assets/img/usablesilvertech.jpg';">`).join('')}</div>`
+    : '<img class="detail-image" src="../assets/img/usablesilvertech.jpg" alt="Service preview">';
+
+  const canEdit = currentUser ? await canManageService(currentUser) : false;
+  const actionButtons = `
+    <div class="detail-actions">
+      <button class="btn btn-primary" id="service-request-inline">Request Service</button>
+      ${canEdit ? '<button class="btn btn-secondary" id="service-edit-inline">Edit Service</button>' : ''}
+    </div>
+  `;
+  const editForm = canEdit ? `
+    <form id="service-edit-form" class="admin-form-shell hidden">
+      <p class="small">Edit service details and use the + button to upload marketing images to Cloudinary.</p>
+      <label class="small" for="edit-service-name">Service name</label>
+      <input id="edit-service-name" value="${(service.name || '').replace(/"/g, '&quot;')}" required>
+      <label class="small" for="edit-service-price">Price</label>
+      <input id="edit-service-price" value="${service.price || ''}" required>
+      <label class="small" for="edit-service-delivery">Delivery timeline</label>
+      <input id="edit-service-delivery" value="${(service.delivery || '').replace(/"/g, '&quot;')}" required>
+      <label class="small" for="edit-service-description">Description</label>
+      <textarea id="edit-service-description">${(service.description || '').replace(/"/g, '&quot;')}</textarea>
+      <div class="upload-control">
+        <button type="button" class="btn btn-secondary upload-plus-btn" id="service-upload-inline">+ Upload Image</button>
+        <span id="edit-service-files-label" class="small">No files selected</span>
+      </div>
+      <input id="edit-service-images" type="file" accept="image/*" multiple class="hidden">
+      <button type="submit">Save Changes</button>
+    </form>
+  ` : '';
+
+  detailShell.innerHTML = `
+    <div class="drawer-header">
+      <h2>${service.name || 'Service'}</h2>
+      <p class="meta">${service.category || 'Service'}</p>
+      <p class="drawer-price">${service.price || '0'} KSH</p>
+      ${actionButtons}
+    </div>
+    <p>${service.description || 'Premium professional delivery.'}</p>
+    <p class="meta">Delivery: ${service.delivery || 'Scheduled'}</p>
+    ${imageMarkup}
+    ${editForm}
+  `;
+
+  detailDrawer.classList.add('open');
+  detailDrawer.setAttribute('aria-hidden', 'false');
+
+  document.getElementById('service-request-inline')?.addEventListener('click', async () => {
+    const phone = prompt('Enter your phone number to submit this service request:');
+    if (phone) {
+      await submitServiceRequest(service.name, phone.trim());
+    }
+  });
+
+  document.getElementById('service-edit-inline')?.addEventListener('click', () => {
+    const form = document.getElementById('service-edit-form');
+    if (form) {
+      form.classList.remove('hidden');
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  document.getElementById('service-upload-inline')?.addEventListener('click', () => {
+    document.getElementById('edit-service-images')?.click();
+  });
+
+  document.getElementById('edit-service-images')?.addEventListener('change', (event) => {
+    const input = event.target;
+    const files = Array.from(input.files || []);
+    const label = document.getElementById('edit-service-files-label');
+    if (label) {
+      label.textContent = files.length ? `${files.length} file(s) selected` : 'No files selected';
+    }
+  });
+
+  document.getElementById('service-edit-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentUser || !(await canManageService(currentUser))) return;
+
+    const updatedName = document.getElementById('edit-service-name').value.trim();
+    const updatedPrice = document.getElementById('edit-service-price').value.trim();
+    const updatedDelivery = document.getElementById('edit-service-delivery').value.trim();
+    const updatedDescription = document.getElementById('edit-service-description').value.trim();
+    const files = Array.from(document.getElementById('edit-service-images').files || []);
+
+    try {
+      const uploadedImages = [];
+      for (const file of files) {
+        const uploadResult = await uploadToCloudinary(file, FOLDERS.MARKETING);
+        uploadedImages.push(uploadResult.secure_url);
+      }
+
+      const updatePayload = {
+        name: updatedName,
+        price: updatedPrice,
+        delivery: updatedDelivery,
+        description: updatedDescription,
+        updatedAt: serverTimestamp()
+      };
+
+      if (uploadedImages.length) {
+        updatePayload.imageUrl = uploadedImages[0];
+        updatePayload.images = uploadedImages;
+        updatePayload.marketingImages = uploadedImages;
+      }
+
+      await updateDoc(doc(db, 'services', service.id), updatePayload);
+      adminServiceStatus.textContent = 'Service updated successfully.';
+      await loadServices();
+      openServiceDrawer({ ...service, ...updatePayload });
+    } catch (error) {
+      adminServiceStatus.textContent = `Error: ${error.message}`;
+    }
+  });
+}
+
+function closeServiceDrawer() {
+  if (!detailDrawer) return;
+  detailDrawer.classList.remove('open');
+  detailDrawer.setAttribute('aria-hidden', 'true');
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -92,6 +252,7 @@ if (adminServiceForm) {
     const delivery = document.getElementById('service-delivery').value.trim();
     const description = document.getElementById('service-description').value.trim();
     const featured = document.getElementById('service-featured').checked;
+    const imageFiles = Array.from(document.getElementById('service-images').files || []);
 
     if (!name || !category || !price || !delivery) {
       adminServiceStatus.textContent = 'Please fill in all required fields.';
@@ -99,6 +260,12 @@ if (adminServiceForm) {
     }
 
     try {
+      const uploadedImages = [];
+      for (const file of imageFiles) {
+        const uploadResult = await uploadToCloudinary(file, FOLDERS.MARKETING);
+        uploadedImages.push(uploadResult.secure_url);
+      }
+
       await addDoc(collection(db, 'services'), {
         name,
         category,
@@ -106,6 +273,9 @@ if (adminServiceForm) {
         delivery,
         description,
         featured,
+        imageUrl: uploadedImages[0] || null,
+        images: uploadedImages,
+        marketingImages: uploadedImages,
         rating: 4.5,
         deleted: false,
         createdAt: serverTimestamp()
@@ -168,11 +338,13 @@ function renderServices(items) {
     const card = document.createElement('article');
     const rating = Number(service.rating || 0);
     const displayRating = Number.isFinite(rating) ? rating.toFixed(1) : '4.5';
-    const categoryKey = String(service.category || 'ELECTRICAL').toUpperCase();
+    const previewImage = Array.isArray(service.images) && service.images.length
+      ? service.images[0]
+      : service.imageUrl || `../assets/img/${String(service.category || 'ELECTRICAL').toUpperCase()}.png`;
 
     card.className = 'service-card';
     card.innerHTML = `
-      <img src="../assets/img/${categoryKey}.png" width="80" alt="${service.name}" onerror="this.onerror=null;this.src='../assets/img/usablesilvertech.jpg';">
+      <img src="${previewImage}" width="80" alt="${service.name}" onerror="this.onerror=null;this.src='../assets/img/usablesilvertech.jpg';">
       <div class="service-top">
         <h3>${service.name}</h3>
         ${service.featured ? '<span class="pill">Featured</span>' : ''}
@@ -188,7 +360,13 @@ function renderServices(items) {
       <button class="request-btn">Request Service</button>
     `;
 
-    card.querySelector('.request-btn').addEventListener('click', async () => {
+    card.addEventListener('click', (event) => {
+      if (event.target.closest('.request-btn, .star-btn')) return;
+      openServiceDrawer(service);
+    });
+
+    card.querySelector('.request-btn').addEventListener('click', async (event) => {
+      event.stopPropagation();
       if (!currentUser) {
         sessionStorage.setItem('redirectAfterLogin', window.location.href);
         window.location.href = '../pages/login.html';
@@ -255,6 +433,10 @@ async function loadServices() {
       requestForm.reset();
     });
   }
+
+  document.querySelectorAll('[data-close-drawer]').forEach((button) => {
+    button.addEventListener('click', closeServiceDrawer);
+  });
 
   if (list) {
     list.className = 'services-grid';

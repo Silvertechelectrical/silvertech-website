@@ -83,6 +83,18 @@ function getDemoRole(email) {
   return 'user';
 }
 
+async function ensureFirebaseReady() {
+  // Firebase is initialized in firebase-init.js
+  // Wait a moment for auth to be available
+  return new Promise((resolve) => {
+    if (auth) {
+      resolve();
+    } else {
+      setTimeout(resolve, 50);
+    }
+  });
+}
+
 function syncDemoAuthUi(user = null) {
   const authStatus = document.getElementById('auth-status');
   if (authStatus) {
@@ -138,6 +150,7 @@ async function handleDemoRegister() {
 
 async function handleLogin() {
   if (!emailInput || !passInput) return;
+  await ensureFirebaseReady();
   if (!auth) {
     await handleDemoLogin();
     return;
@@ -175,6 +188,7 @@ async function handleLogin() {
 
 async function handleRegister() {
   if (!emailInput || !passInput) return;
+  await ensureFirebaseReady();
   if (!auth) {
     await handleDemoRegister();
     return;
@@ -203,6 +217,7 @@ async function handleRegister() {
 }
 
 async function handleGoogleLogin() {
+  await ensureFirebaseReady();
   if (!auth) {
     setStatus('Firebase is not configured yet. Demo mode is active, so use email/password to continue.', true);
     return;
@@ -260,35 +275,38 @@ if (logoutBtn) logoutBtn.addEventListener('click', async () => {
   window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
 });
 
-if (auth) {
-  onAuthStateChanged(auth, async (user) => {
-    const authStatus = document.getElementById('auth-status');
-    if (authStatus) {
-      authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
-    }
-    if (deleteAccountBtn) {
-      deleteAccountBtn.classList.toggle('hidden', !user);
-    }
-
-    if (user) {
-      try {
-        const role = await getUserRole(user);
-        sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
-      } catch (err) {
-        console.warn('Failed to populate session user role:', err);
+(async function initAuthState() {
+  await ensureFirebaseReady();
+  if (auth) {
+    onAuthStateChanged(auth, async (user) => {
+      const authStatus = document.getElementById('auth-status');
+      if (authStatus) {
+        authStatus.textContent = user ? `Signed in as ${user.email}` : 'Guest access';
       }
-    } else {
-      sessionStorage.removeItem('user');
-    }
-  });
-} else {
-  const demoUser = sessionStorage.getItem(DEMO_SESSION_KEY);
-  if (demoUser) {
-    syncDemoAuthUi(JSON.parse(demoUser));
+      if (deleteAccountBtn) {
+        deleteAccountBtn.classList.toggle('hidden', !user);
+      }
+
+      if (user) {
+        try {
+          const role = await getUserRole(user);
+          sessionStorage.setItem('user', JSON.stringify({ uid: user.uid, email: user.email, displayName: user.displayName, role }));
+        } catch (err) {
+          console.warn('Failed to populate session user role:', err);
+        }
+      } else {
+        sessionStorage.removeItem('user');
+      }
+    });
   } else {
-    syncDemoAuthUi();
+    const demoUser = sessionStorage.getItem(DEMO_SESSION_KEY);
+    if (demoUser) {
+      syncDemoAuthUi(JSON.parse(demoUser));
+    } else {
+      syncDemoAuthUi();
+    }
   }
-}
+})();
 
 if (deleteAccountBtn) {
   deleteAccountBtn.addEventListener('click', async () => {

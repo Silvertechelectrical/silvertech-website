@@ -33,27 +33,42 @@
             <h1>Silvertech Admin Panel</h1>
             <p class="small">Manage services, view requests, and keep your admin workflow secure.</p>
             <p id="admin-welcome" class="small"></p>
+            <div class="catalog-card-actions">
+                <a class="btn btn-secondary" href="create-role-position.html">Create Role / Position</a>
+                <button id="headerLogoutBtn" class="btn btn-secondary hidden">Sign Out</button>
+            </div>
             <div id="admin-metrics" class="status-banner hidden" role="status"></div>
         </section>
 
         <section class="panel">
             <h2>Assign Workforce Roles</h2>
-            <p class="small">Update a user's role by email so they can access the appropriate workforce tools.</p>
+            <p class="small">Update a user's role and access position by email. Select an email from the dropdown or type one manually.</p>
             <form id="role-assignment-form" class="admin-form-shell">
                 <label class="small" for="role-assignment-email">User email *</label>
-                <input id="role-assignment-email" type="email" placeholder="user@example.com" required>
+                <input id="role-assignment-email" list="role-email-options" type="email" placeholder="user@example.com" required autocomplete="email">
+                <datalist id="role-email-options"></datalist>
+
+                <label class="small" for="role-assignment-position">Position</label>
+                <input id="role-assignment-position" type="text" placeholder="Sales Engineer, Technician, Service Provider">
 
                 <label class="small" for="role-assignment-role">Role *</label>
-                <select id="role-assignment-role" required>
-                    <option value="">Select role</option>
-                    <option value="user">User</option>
-                    <option value="developer">Developer</option>
-                    <option value="service_provider">Service Provider</option>
-                    <option value="sales_engineer">Sales Engineer</option>
-                    <option value="admin">Admin</option>
-                </select>
+                <input id="role-assignment-role" list="role-name-options" type="text" placeholder="Type a role name or choose an existing one" required autocomplete="off">
+                <datalist id="role-name-options"></datalist>
 
-                <button type="submit">Update Role</button>
+                <fieldset id="permission-assignments" class="permission-grid">
+                    <legend class="small">Permissions / access</legend>
+                    <label><input type="checkbox" value="access_dashboard"> Dashboard access</label>
+                    <label><input type="checkbox" value="manage_users"> Manage users</label>
+                    <label><input type="checkbox" value="manage_services"> Manage services</label>
+                    <label><input type="checkbox" value="manage_store"> Manage store</label>
+                    <label><input type="checkbox" value="upload_store_assets"> Upload store assets</label>
+                    <label><input type="checkbox" value="manage_service_media"> Manage service media</label>
+                    <label><input type="checkbox" value="edit_product_variables"> Edit product variables</label>
+                    <label><input type="checkbox" value="request_service"> Request service</label>
+                    <label><input type="checkbox" value="browse"> Browse site</label>
+                </fieldset>
+
+                <button type="submit">Save role and access</button>
                 <p id="role-assignment-status" class="status-message"></p>
             </form>
         </section>

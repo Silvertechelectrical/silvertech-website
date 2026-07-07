@@ -1,4 +1,4 @@
-const CACHE_NAME = 'silvertech-cache-v4';
+const CACHE_NAME = 'silvertech-cache-v5';
 const BASE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '/';
 const normalize = (path) => (BASE_PATH.endsWith('/') ? `${BASE_PATH}${path.replace(/^[\/]+/, '')}` : `${BASE_PATH}/${path.replace(/^[\/]+/, '')}`);
 const ASSETS_TO_CACHE = [
@@ -10,8 +10,10 @@ const ASSETS_TO_CACHE = [
   normalize('assets/img/silverbackground.png'),
   normalize('assets/img/usablesilvertech.jpg'),
   normalize('js/load-firebase-config.js?v=20260702'),
-  normalize('js/firebase-init.js?v=20260702'),
+  normalize('js/firebase-init.js?v=20260707'),
   normalize('js/auth-nav.js?v=20260702'),
+  normalize('js/auth.js?v=20260707'),
+  normalize('js/role-utils.js?v=20260707'),
   normalize('js/register-sw.js?v=20260702'),
   normalize('pages/services.html'),
   normalize('pages/shop.html'),

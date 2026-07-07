@@ -57,10 +57,34 @@
     <script>
         const historyList = document.getElementById('history-list');
         const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
-        if (history.length) {
-            historyList.innerHTML = history.map((item) => `<div class="history-item"><strong>${item.name}</strong><br><span class="small">${item.type} • ${item.at}</span></div>`).join('');
+
+        if (!historyList) {
+            console.warn('Dashboard history list not found.');
+        } else if (history.length) {
+            historyList.replaceChildren();
+            history.forEach((item) => {
+                const entry = document.createElement('div');
+                entry.className = 'history-item';
+
+                const name = document.createElement('strong');
+                name.textContent = item?.name || 'Activity';
+                entry.appendChild(name);
+
+                const breakLine = document.createElement('br');
+                entry.appendChild(breakLine);
+
+                const meta = document.createElement('span');
+                meta.className = 'small';
+                meta.textContent = `${item?.type || 'Activity'} • ${item?.at || 'Unknown'}`;
+                entry.appendChild(meta);
+
+                historyList.appendChild(entry);
+            });
         } else {
-            historyList.innerHTML = '<p class="small">No activity yet. Request a service or open the store to begin.</p>';
+            const emptyState = document.createElement('p');
+            emptyState.className = 'small';
+            emptyState.textContent = 'No activity yet. Request a service or open the store to begin.';
+            historyList.replaceChildren(emptyState);
         }
     </script>
 </body>

@@ -194,7 +194,7 @@ function renderRoleOptions(roles = []) {
   const dataList = document.getElementById('role-name-options');
   if (!dataList) return;
 
-  const predefinedRoles = ['user', 'developer', 'service_provider', 'sales_engineer', 'engineer', 'admin'];
+  const predefinedRoles = ['user', 'developer', 'digital_lead', 'it_support', 'sales_ops_manager', 'sales_associate', 'engineering_lead', 'field_technician', 'junior_technician', 'managing_director'];
   const combinedRoles = Array.from(new Set([...predefinedRoles, ...roles.filter(Boolean)]))
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
@@ -309,12 +309,12 @@ async function isAdmin(user) {
   if (!user) return false;
   console.log('Admin check user:', { uid: user.uid, email: user.email });
   try {
-    let queryRef = query(collection(db, 'users'), where('uid', '==', user.uid), where('role', '==', 'admin'));
+    let queryRef = query(collection(db, 'users'), where('uid', '==', user.uid), where('role', '==', 'managing_director'));
     let snapshot = await getDocs(queryRef);
     if (!snapshot.empty) return true;
 
     if (user.email) {
-      queryRef = query(collection(db, 'users'), where('email', '==', user.email), where('role', '==', 'admin'));
+      queryRef = query(collection(db, 'users'), where('email', '==', user.email), where('role', '==', 'managing_director'));
       snapshot = await getDocs(queryRef);
       if (!snapshot.empty) return true;
     }
@@ -364,8 +364,48 @@ if (headerLogoutBtn) {
 if (roleAssignmentForm) {
   roleAssignmentForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const email = document.getElementById('role-assignment-email').value;
-    const role = roleAssignmentRoleInput ? roleAssignmentRoleInput.value.trim() : '';
+    
+    const email = (roleAssignmentEmailInput?.value || '').trim();
+    const role = (roleAssignmentRoleInput?.value || '').trim();
+    const position = (roleAssignmentPositionInput?.value || '').trim();
+    const permissions = getSelectedPermissions();
+
+    if (!email || !role) {
+      roleAssignmentStatus.textContent = 'Email and role are required.';
+      roleAssignmentStatus.style.color = '#ff7b7b';
+      return;
+    }
+
+    try {
+      // Find the user document by email
+      const snapshot = await getDocs(query(collection(db, 'users'), where('email', '==', email), limit(1)));
+      if (snapshot.empty) {
+        roleAssignmentStatus.textContent = `No user found with email: ${email}. Create the account first.`;
+        roleAssignmentStatus.style.color = '#ff7b7b';
+        return;
+      }
+
+      const userDocRef = snapshot.docs[0].ref;
+      
+      // Update the user document with new role, position, and permissions
+      await updateDoc(userDocRef, {
+        role,
+        position,
+        permissions,
+        updatedAt: serverTimestamp()
+      });
+
+      roleAssignmentStatus.textContent = `Role assignment saved for ${email}: ${role}`;
+      roleAssignmentStatus.style.color = '#00D4FF';
+      
+      // Refresh lists
+      await loadUserEmails();
+      await loadRoleOptions();
+    } catch (error) {
+      roleAssignmentStatus.textContent = `Error saving role assignment: ${error.message}`;
+      roleAssignmentStatus.style.color = '#ff7b7b';
+    }
+  });
 }
 
 if (roleAssignmentEmailInput) {

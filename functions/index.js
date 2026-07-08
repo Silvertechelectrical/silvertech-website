@@ -123,6 +123,63 @@ exports.notifyAdminApproval = functions.firestore
     return null;
   });
 
+// Firestore trigger: update user profile when a new purchase is recorded
+exports.onNewPurchase = functions.firestore
+  .document('shop-purchases/{purchaseId}')
+  .onCreate(async (snap, context) => {
+    const purchaseData = snap.data ? snap.data() : (snap.exists ? snap.data() : null);
+    if (!purchaseData) return null;
+
+    const userId = purchaseData.userId || purchaseData.uid || purchaseData.buyerId;
+    const totalAmount = purchaseData.amount || purchaseData.total || null;
+
+    if (!userId) {
+      console.log('onNewPurchase: no userId found in purchase record.');
+      return null;
+    }
+
+    try {
+      const userRef = admin.firestore().collection('users').doc(userId);
+      await userRef.update({
+        lastPurchaseAmount: totalAmount,
+        lastPurchaseAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      console.log(`Updated user ${userId} with last purchase.`);
+    } catch (err) {
+      console.error('onNewPurchase: failed to update user profile', err);
+    }
+
+    return null;
+  });
+
+// Secure callable: allow existing admin to grant admin custom claim to another user
+exports.grantAdminRole = functions.https.onCall(async (data, context) => {
+  // Verify caller is authenticated and has admin claim
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+  }
+
+  const callerClaims = context.auth.token || {};
+  if (!callerClaims.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only existing administrators can assign roles.');
+  }
+
+  const targetUid = data && data.uid;
+  if (!targetUid) {
+    throw new functions.https.HttpsError('invalid-argument', 'You must provide a target user UID.');
+  }
+
+  try {
+    await admin.auth().setCustomUserClaims(targetUid, { admin: true });
+    // Keep role string consistent with client role mapping
+    await admin.firestore().collection('users').doc(targetUid).set({ role: 'managing_director' }, { merge: true });
+    return { message: `Success! User ${targetUid} has been granted admin privileges.` };
+  } catch (error) {
+    console.error('grantAdminRole failed:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to assign admin privileges.');
+  }
+});
+
 // Callable function to list Firebase Auth users for admin UI
 exports.listAuthUsers = functions.https.onCall(async (data, context) => {
   // Ensure caller is authenticated

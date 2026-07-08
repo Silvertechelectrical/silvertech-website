@@ -59,6 +59,32 @@ a { color: var(--neon-blue); text-decoration: none; }
     text-transform: uppercase;
 }
 
+/* Make the brand area act like a clear, clickable Home button */
+.brand {
+    cursor: pointer; /* visual affordance */
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background 0.25s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+.brand:hover {
+    background: var(--surface-strong);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.brand:focus-visible {
+    outline: 2px solid rgba(0, 212, 255, 0.72);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+.brand > span:last-child {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--silver);
+}
+
 .brand-logo {
     font-size: 20px;
     font-weight: 800;

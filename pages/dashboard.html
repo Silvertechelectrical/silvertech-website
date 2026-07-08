@@ -62,10 +62,31 @@
     <script>
         const historyList = document.getElementById('history-list');
         const history = JSON.parse(localStorage.getItem('silvertech-history') || '[]');
+        historyList.textContent = '';
         if (history.length) {
-            historyList.innerHTML = history.map((item) => `<div class="history-item"><strong>${item.name}</strong><br><span class="small">${item.type} • ${item.at}</span></div>`).join('');
+            const fragment = document.createDocumentFragment();
+            history.forEach((item) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                const strong = document.createElement('strong');
+                strong.textContent = item.name || '';
+
+                const dateText = document.createElement('span');
+                dateText.className = 'small';
+                dateText.textContent = `${item.type || ''} • ${item.at || ''}`;
+
+                historyItem.appendChild(strong);
+                historyItem.appendChild(document.createElement('br'));
+                historyItem.appendChild(dateText);
+                fragment.appendChild(historyItem);
+            });
+            historyList.appendChild(fragment);
         } else {
-            historyList.innerHTML = '<p class="small">No activity yet. Request a service or open the store to begin.</p>';
+            const emptyMessage = document.createElement('p');
+            emptyMessage.className = 'small';
+            emptyMessage.textContent = 'No activity yet. Request a service or open the store to begin.';
+            historyList.appendChild(emptyMessage);
         }
     </script>
 </body>

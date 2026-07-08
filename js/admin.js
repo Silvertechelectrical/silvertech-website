@@ -13,6 +13,7 @@ import {
   limit,
   startAfter
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-functions.js';
 
 const adminLoading = document.getElementById('admin-loading');
 const adminUnauthenticated = document.getElementById('admin-unauthenticated');
@@ -215,6 +216,25 @@ async function loadRoleOptions() {
 }
 
 async function loadUserEmails() {
+  // Prefer listing from Firebase Authentication via callable function (requires deployed functions)
+  try {
+    const functions = getFunctions();
+    const listUsers = httpsCallable(functions, 'listAuthUsers');
+    const result = await listUsers();
+    const users = Array.isArray(result.data?.users) ? result.data.users : [];
+    const emails = users
+      .map((u) => u.email)
+      .filter((email) => typeof email === 'string')
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    if (emails.length) {
+      renderEmailOptions([...new Set(emails)]);
+      return;
+    }
+  } catch (err) {
+    // fall back to Firestore users collection
+    console.warn('Auth listUsers callable failed or not available, falling back to Firestore:', err?.message || err);
+  }
+
   try {
     const snapshot = await getDocs(query(collection(db, 'users'), orderBy('email'), limit(200)));
     const emails = snapshot.docs
@@ -223,7 +243,7 @@ async function loadUserEmails() {
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
     renderEmailOptions([...new Set(emails)]);
   } catch (error) {
-    console.warn('Unable to load user email options:', error);
+    console.warn('Unable to load user email options from Firestore:', error);
   }
 }
 

@@ -15,23 +15,29 @@ import {
 export const ROLES = {
   guest: 'guest',
   user: 'user',
+  managing_director: 'managing_director',
+  sales_ops_manager: 'sales_ops_manager',
+  sales_associate: 'sales_associate',
+  engineering_lead: 'engineering_lead',
+  field_technician: 'field_technician',
+  junior_technician: 'junior_technician',
+  digital_lead: 'digital_lead',
   developer: 'developer',
-  service_provider: 'service_provider',
-  sales: 'sales',
-  sales_engineer: 'sales_engineer',
-  engineer: 'engineer',
-  admin: 'admin'
+  it_support: 'it_support'
 };
 
 export const ROLE_CAPABILITIES = {
   [ROLES.guest]: ['browse'],
   [ROLES.user]: ['browse', 'purchase', 'request_service'],
-  [ROLES.developer]: ['upload_store_assets', 'browse'],
-  [ROLES.service_provider]: ['manage_service_media', 'browse'],
-  [ROLES.sales]: ['edit_product_variables', 'browse'],
-  [ROLES.sales_engineer]: ['edit_product_variables', 'browse'],
-  [ROLES.engineer]: ['edit_product_variables', 'browse'],
-  [ROLES.admin]: ['manage_users', 'manage_services', 'manage_store', 'browse', 'access_dashboard']
+  [ROLES.managing_director]: ['manage_users', 'manage_services', 'manage_store', 'browse', 'access_dashboard', 'approve_projects'],
+  [ROLES.sales_ops_manager]: ['quote', 'manage_procurement', 'manage_projects', 'browse'],
+  [ROLES.sales_associate]: ['lead_generation', 'book_site_visits', 'browse'],
+  [ROLES.engineering_lead]: ['assign_techs', 'qa', 'browse'],
+  [ROLES.field_technician]: ['execute_install', 'browse'],
+  [ROLES.junior_technician]: ['assist_install', 'browse'],
+  [ROLES.digital_lead]: ['manage_projects', 'code_review', 'browse'],
+  [ROLES.developer]: ['upload_store_assets', 'code', 'browse'],
+  [ROLES.it_support]: ['it_support', 'browse']
 };
 
 export const DEFAULT_ROLE = ROLES.user;
@@ -150,8 +156,8 @@ export async function isAdminUser(user) {
   }
 
   // Fall back to role check
-  const hasAdminRole = await hasAnyRole(user, [ROLES.admin]);
-  console.debug(`[role-utils] isAdminUser: hasAnyRole(admin) = ${hasAdminRole}`);
+  const hasAdminRole = await hasAnyRole(user, [ROLES.managing_director]);
+  console.debug(`[role-utils] isAdminUser: hasAnyRole(managing_director) = ${hasAdminRole}`);
   
   if (hasAdminRole) {
     console.debug('[role-utils] isAdminUser: ✓ User has admin role');
@@ -164,26 +170,27 @@ export async function isAdminUser(user) {
 
 export async function isDeveloperUser(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.developer, ROLES.admin]);
+  return hasAnyRole(user, [ROLES.developer, ROLES.digital_lead, ROLES.managing_director]);
 }
 
 export async function isApprovedDeveloper(user) {
   if (!user) return false;
   const profile = await getUserProfile(user);
-  return Boolean(profile && (profile.role === ROLES.developer || profile.role === ROLES.admin) && profile.approved === true);
+  return Boolean(profile && (profile.role === ROLES.developer || profile.role === ROLES.digital_lead || profile.role === ROLES.managing_director) && profile.approved === true);
 }
 
 export async function isServiceProvider(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.service_provider, ROLES.admin]);
+  return hasAnyRole(user, [ROLES.field_technician, ROLES.engineering_lead, ROLES.managing_director]);
 }
 
 export async function isSalesEngineerAdmin(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.sales, ROLES.sales_engineer, ROLES.engineer, ROLES.admin]);
+  // Combine sales and engineering leadership roles
+  return hasAnyRole(user, [ROLES.sales_ops_manager, ROLES.sales_associate, ROLES.engineering_lead, ROLES.managing_director]);
 }
 
 export async function isWorkforceUser(user) {
   if (!user) return false;
-  return hasAnyRole(user, [ROLES.service_provider, ROLES.sales, ROLES.sales_engineer, ROLES.engineer, ROLES.admin]);
+  return hasAnyRole(user, [ROLES.field_technician, ROLES.junior_technician, ROLES.sales_ops_manager, ROLES.sales_associate, ROLES.engineering_lead, ROLES.managing_director]);
 }

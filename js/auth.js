@@ -78,7 +78,7 @@ function getDemoUser(email) {
 }
 
 function getDemoRole(email) {
-  if (email.toLowerCase().includes('admin')) return 'admin';
+  if (email.toLowerCase().includes('admin')) return 'managing_director';
   if (email.toLowerCase().includes('developer')) return 'developer';
   return 'user';
 }

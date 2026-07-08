@@ -835,12 +835,15 @@ button:hover { transform: translateY(-1px); background: var(--silver); }
     position: relative;
     width: min(420px, 100%);
     height: 100%;
-    padding: 24px 20px;
+    max-height: 100vh;
+    padding: 24px 20px 32px;
     background: var(--surface);
     border-left: 1px solid rgba(255,255,255,0.14);
     box-shadow: -12px 0 40px rgba(0,0,0,0.24);
     transform: translateX(100%);
     transition: transform 0.24s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .purchase-drawer.open .purchase-drawer-content { transform: translateX(0); }

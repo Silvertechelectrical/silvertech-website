@@ -122,3 +122,41 @@ exports.notifyAdminApproval = functions.firestore
     await sendEmail(subject, html, text);
     return null;
   });
+
+// Callable function to list Firebase Auth users for admin UI
+exports.listAuthUsers = functions.https.onCall(async (data, context) => {
+  // Ensure caller is authenticated
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+  }
+
+  const callerUid = context.auth.uid;
+
+  // Allow if caller has admin custom claim
+  if (context.auth.token && context.auth.token.admin) {
+    // allowed
+  } else {
+    // Otherwise check Firestore users collection for managing_director role
+    try {
+      const userDoc = await admin.firestore().collection('users').doc(callerUid).get();
+      if (!userDoc.exists || (userDoc.data() || {}).role !== 'managing_director') {
+        throw new functions.https.HttpsError('permission-denied', 'Admin privileges required');
+      }
+    } catch (err) {
+      if (err instanceof functions.https.HttpsError) throw err;
+      throw new functions.https.HttpsError('internal', 'Failed to verify caller role');
+    }
+  }
+
+  try {
+    const maxResults = 1000;
+    const list = [];
+    const result = await admin.auth().listUsers(maxResults);
+    result.users.forEach((u) => {
+      list.push({ uid: u.uid, email: u.email || null, displayName: u.displayName || null });
+    });
+    return { users: list };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', 'Failed to list users');
+  }
+});
